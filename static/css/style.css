@@ -1,0 +1,162 @@
+/* Основные переменные цветов */
+:root {
+  --black: #000000;
+  --dark-black: #121212;
+  --gold: #c9a145; /* Более светлое золото для лучшей читаемости */
+  --light-gold: #F5D98B;
+  --dark-gold: #B8860B;
+  --white: #FFFFFF;
+  --gray: #2A2A2A;
+  --light-gray: #3A3A3A; /* Добавлен для контраста */
+}
+
+/* Сброс стилей и базовые настройки */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Playfair Display', serif;
+  background-color: var(--dark-black);
+  color: var(--light-gold); /* Изменено на light-gold для лучшей читаемости */
+  line-height: 1.8; /* Увеличен межстрочный интервал */
+  overflow-x: hidden;
+}
+
+/* Улучшение контраста текста */
+p, li, a, span, div {
+  color: rgba(255, 255, 255, 0.9); /* Чуть ярче белый */
+}
+
+/* Типография */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+h1 {
+  font-size: 3rem;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+  font-size: 2.2rem;
+  border-bottom: 1px solid var(--gold);
+  padding-bottom: 0.5rem;
+  margin: 2rem 0;
+  color: var(--light-gold); /* Более светлый для заголовков */
+}
+
+p {
+  font-size: 1.2rem; /* Увеличен размер шрифта */
+  margin-bottom: 1.5rem;
+  line-height: 1.8; /* Больше межстрочный интервал */
+}
+
+/* Контейнеры для текста */
+.content-section {
+  background-color: var(--gray);
+  padding: 2rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Шапка */
+header {
+  background: linear-gradient(to right, var(--black), var(--gray));
+  padding: 1.5rem 0;
+  border-bottom: 2px solid var(--gold);
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+}
+
+.nav-links a {
+  color: var(--light-gold); /* Более светлый для навигации */
+  text-decoration: none;
+  font-size: 1.1rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Основное содержимое */
+main {
+  padding-top: 100px; /* Отступ для фиксированного header */
+  padding-bottom: 50px;
+  min-height: calc(100vh - 150px);
+  background-color: var(--dark-black);
+}
+
+/* Карточки */
+.card {
+  background-color: var(--light-gray); /* Более светлый фон */
+  border: 1px solid var(--gold);
+  padding: 2rem;
+  transition: transform 0.3s ease;
+  color: var(--white);
+}
+
+/* Подвал */
+footer {
+  background-color: var(--black);
+  padding: 3rem 0;
+  text-align: center;
+  border-top: 2px solid var(--gold);
+  color: var(--light-gold);
+}
+
+/* Улучшение контраста ссылок */
+a {
+  color: var(--light-gold);
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--white);
+  text-decoration: underline;
+}
+
+/* Дополнительные улучшения читаемости */
+.content-block {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-left: 3px solid var(--gold);
+}
+
+.highlight-text {
+  color: var(--light-gold);
+  font-weight: 600;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+  body {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .content-section {
+    padding: 1rem;
+  }
+}
