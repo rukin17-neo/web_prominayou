@@ -20,7 +20,7 @@ func main() {
 		http.StripPrefix("/static", http.FileServer(http.Dir("static"))),
 	)
 
-	port := ":8005"
+	port := ":8006"
 	log.Printf("Сервер запущен на http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, r)) //TODO ListenAndServeTLC для https
 }
