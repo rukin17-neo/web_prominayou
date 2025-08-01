@@ -4,9 +4,20 @@ import (
 	"log"
 	"net/http"
 	"prommsc/internal/handlers"
+	"time"
 
 	"github.com/gorilla/mux"
 )
+
+func cacheControl(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Кеширование на 1 год для статики
+		w.Header().Set("ETag", `"`+time.Now().Format("20060102")+`"`)
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		w.Header().Set("Vary", "Accept-Encoding")
+		h.ServeHTTP(w, r)
+	})
+}
 
 func main() {
 	r := mux.NewRouter()
@@ -20,6 +31,11 @@ func main() {
 
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static", http.FileServer(http.Dir("static"))),
+	)
+
+	fs := http.FileServer(http.Dir("static"))
+	r.PathPrefix("/static/").Handler(
+		http.StripPrefix("/static", cacheControl(fs)),
 	)
 
 	port := ":8006"
