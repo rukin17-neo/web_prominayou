@@ -16,6 +16,8 @@ func main() {
 	r.HandleFunc("/price", handlers.PriceHandler)
 	r.HandleFunc("/reviews", handlers.ReviewsHandler)
 
+	r.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
+
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static", http.FileServer(http.Dir("static"))),
 	)
