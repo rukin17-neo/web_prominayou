@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"prommsc/config"
 	"prommsc/internal/handlers"
 	"time"
 
@@ -20,6 +21,22 @@ func cacheControl(h http.Handler) http.Handler {
 }
 
 func main() {
+	config.LoadEnv()
+
+	db, err := config.InitDB()
+	if err != nil {
+		log.Fatalf("ошибка подключения к БД: %v, err")
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		log.Fatalf("Не удалось проверить подключение к БД: %v", err)
+	}
+	log.Println("Успешное подключение к PostgreSQL")
+
+	serviceRepo := models.
+
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", handlers.HomeHandler).Methods("GET")

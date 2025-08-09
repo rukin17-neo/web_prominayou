@@ -1,7 +1,8 @@
 package models
 
 type Service struct {
-	Name  string
-	Price string
-	Time  string
+	ID       int     `db:"id" json:"id"`
+	Name     string  `db:"name" json:"name"`
+	Price    float64 `db:"price" json:"price"`
+	Duration string  `db:"duration" json:"duration"`
 }

@@ -7,9 +7,9 @@ import (
 
 func PriceHandler(w http.ResponseWriter, r *http.Request) {
 	service := models.Service{
-		Name:  "Антицеллюлитный массаж",
-		Price: "4000 руб.",
-		Time:  "60 минут",
+		Name:     "Антицеллюлитный массаж",
+		Price:    4000.0,
+		Duration: "60 минут",
 	}
 	data := struct {
 		models.PageData
