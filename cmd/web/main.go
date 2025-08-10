@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"prommsc/config"
 	"prommsc/internal/handlers"
+	"prommsc/models"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -25,7 +26,7 @@ func main() {
 
 	db, err := config.InitDB()
 	if err != nil {
-		log.Fatalf("ошибка подключения к БД: %v, err")
+		log.Fatalf("ошибка подключения к БД: %v", err)
 	}
 	defer db.Close()
 
@@ -34,28 +35,30 @@ func main() {
 	}
 	log.Println("Успешное подключение к PostgreSQL")
 
-	serviceRepo := models.
-
+	serviceRepo := models.NewServiceRepository(db)
+	servicesHandler := handlers.NewServicesHandler(serviceRepo)
+	adminHandler := handlers.NewAdminServicesHandler(serviceRepo)
 
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", handlers.HomeHandler).Methods("GET")
-	r.HandleFunc("/contacts", handlers.ContactsHandler)
-	r.HandleFunc("/price", handlers.PriceHandler)
-	r.HandleFunc("/reviews", handlers.ReviewsHandler)
+	r.HandleFunc("/services", servicesHandler.GetAllServices).Methods("GET")
+	r.HandleFunc("/contacts", handlers.ContactsHandler).Methods("GET")
+	r.HandleFunc("/price", handlers.PriceHandler).Methods("GET")
+	r.HandleFunc("/reviews", handlers.ReviewsHandler).Methods("GET")
 
-	r.NotFoundHandler = http.HandlerFunc(handlers.NotFoundHandler)
+	adminRouter := r.PathPrefix("/admin").Subrouter()
+	adminRouter.Use(handlers.AuthMiddleware)
+
+	adminRouter.HandleFunc("/services", adminHandler.ListServices).Methods("GET")
+	adminRouter.HandleFunc("/services", adminHandler.UpdateService).Methods("POST")
+	adminRouter.HandleFunc("/services/{id:[0-9]+}", adminHandler.DeleteService).Methods("DELETE")
 
 	r.PathPrefix("/static/").Handler(
-		http.StripPrefix("/static", http.FileServer(http.Dir("static"))),
-	)
-
-	fs := http.FileServer(http.Dir("static"))
-	r.PathPrefix("/static/").Handler(
-		http.StripPrefix("/static", cacheControl(fs)),
+		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),
 	)
 
 	port := ":8006"
 	log.Printf("Сервер запущен на http://localhost%s", port)
-	log.Fatal(http.ListenAndServe(port, r)) //TODO ListenAndServeTLC для https
+	log.Fatal(http.ListenAndServe(port, r))
 }
