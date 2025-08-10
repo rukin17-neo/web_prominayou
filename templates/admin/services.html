@@ -1,0 +1,16 @@
+<h1>{{ .Title }}</h1>
+
+<table>
+    <tr>
+        <th>Услуга</th>
+        <th>Цена (руб.)</th>
+        <th>Длительность</th>
+    </tr>
+    {{ range .Services }}
+    <tr>
+        <td>{{ .Name }}</td>
+        <td>{{ printf "%.0f" .Price }}</td>
+        <td>{{ .Duration }}</td>
+    </tr>
+    {{ end }}
+</table>

@@ -1,0 +1,14 @@
+{{ define "content" }}
+<div class="contacts">
+    <h1>{{ .Title }}</h1>
+    <p>{{ .Content }}</p>
+    
+    <div class="contact-info">
+        <h3>Адрес:</h3>
+        <p>{{ .Address }}</p>
+        
+        <h3>Телефон:</h3>
+        <p>{{ .Phone }}</p>
+    </div>
+</div>
+{{ end }}
