@@ -1,0 +1,27 @@
+{{ define "content" }}
+<div class="admin-container">
+    <h2>{{ .Title }}</h2>
+    
+    <form action="/admin/services" method="POST" class="admin-form">
+        <div class="form-group">
+            <label for="name">Название услуги</label>
+            <input type="text" id="name" name="name" required class="form-control">
+        </div>
+        
+        <div class="form-group">
+            <label for="price">Цена</label>
+            <input type="number" id="price" name="price" step="0.01" min="0" required class="form-control">
+        </div>
+        
+        <div class="form-group">
+            <label for="duration">Длительность</label>
+            <input type="text" id="duration" name="duration" required class="form-control">
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Создать</button>
+            <a href="/admin/services" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{{ end }}

@@ -1,16 +1,54 @@
-<h1>{{ .Title }}</h1>
+{{ define "content" }}
+<div class="admin-container">
+    <h2>Управление услугами</h2>
+    
+    <form action="/admin/services" method="POST" class="admin-form">
+        {{ if .EditService }}
+        <input type="hidden" name="id" value="{{ .EditService.ID }}">
+        {{ end }}
+        <div class="form-group">
+            <label for="name">Название услуги:</label>
+            <input type="text" id="name" name="name" required class="form-control" value="{{ if .EditService }}{{ .EditService.Name }}{{ end }}">
+        </div>
+        <div class="form-group">
+            <label for="price">Цена:</label>
+            <input type="number" id="price" name="price" step="0.01" min="0" required class="form-control" value="{{ if .EditService }}{{ printf "%.2f" .EditService.Price }}{{ end }}">
+        </div>
+        <div class="form-group">
+            <label for="duration">Длительность:</label>
+            <input type="text" id="duration" name="duration" required class="form-control" value="{{ if .EditService }}{{ .EditService.Duration }}{{ end }}">
+        </div>
+        <button type="submit" class="btn btn-primary">{{ if .EditService }}Сохранить изменения{{ else }}Добавить услугу{{ end }}</button>
+    </form>
 
-<table>
-    <tr>
-        <th>Услуга</th>
-        <th>Цена (руб.)</th>
-        <th>Длительность</th>
-    </tr>
-    {{ range .Services }}
-    <tr>
-        <td>{{ .Name }}</td>
-        <td>{{ printf "%.0f" .Price }}</td>
-        <td>{{ .Duration }}</td>
-    </tr>
-    {{ end }}
-</table>
+    <div class="admin-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Цена</th>
+                    <th>Длительность</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .Services }}
+                <tr>
+                    <td>{{ .ID }}</td>
+                    <td>{{ .Name }}</td>
+                    <td>{{ printf "%.2f" .Price }} ₽</td>
+                    <td>{{ .Duration }}</td>
+                    <td>
+                        <a href="/admin/services?edit={{ .ID }}" class="btn-edit">Редактировать</a>
+                        <form action="/admin/services/delete/{{ .ID }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn-delete">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{ end }}

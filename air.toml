@@ -1,6 +1,13 @@
 [build]
 cmd = "go build -o ./tmp/main ./cmd/web/main.go"
 bin = "./tmp/main"
-include_ext = ["go", "html", "css", "js"]
-exclude_dir = ["tmp", "vendor"]
-delay = 1000
+include_ext = ["go", "html", "tpl", "tmpl", "css"]
+include_dir = ["templates", "cmd", "internal", "static"]
+exclude_dir = ["tmp", ".git"]
+delay = 1000  # ms
+
+[log]
+color = true
+
+[misc]
+clean_on_exit = true

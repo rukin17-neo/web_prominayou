@@ -2,6 +2,7 @@ package handlers
 
 import "net/http"
 
+// TODO Доделать!!!
 // mock auth
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

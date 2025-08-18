@@ -6,8 +6,9 @@ import (
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "index.html", models.PageData{
+	data := models.PageData{
 		Title:   "ProminaYou - Главная",
 		Content: "Добро пожаловать на наш сайт!",
-	})
+	}
+	RenderTemplate(w, "index.html", data)
 }

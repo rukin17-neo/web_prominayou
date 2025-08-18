@@ -35,6 +35,10 @@ func main() {
 	}
 	log.Println("Успешное подключение к PostgreSQL")
 
+	if err := handlers.InitTemplates(); err != nil {
+		log.Fatalf("Ошибка загрузки шаблонов: %v", err)
+	}
+
 	serviceRepo := models.NewServiceRepository(db)
 	servicesHandler := handlers.NewServicesHandler(serviceRepo)
 	adminHandler := handlers.NewAdminServicesHandler(serviceRepo)
@@ -44,21 +48,23 @@ func main() {
 	r.HandleFunc("/", handlers.HomeHandler).Methods("GET")
 	r.HandleFunc("/services", servicesHandler.GetAllServices).Methods("GET")
 	r.HandleFunc("/contacts", handlers.ContactsHandler).Methods("GET")
-	r.HandleFunc("/price", handlers.PriceHandler).Methods("GET")
 	r.HandleFunc("/reviews", handlers.ReviewsHandler).Methods("GET")
 
 	adminRouter := r.PathPrefix("/admin").Subrouter()
 	adminRouter.Use(handlers.AuthMiddleware)
 
 	adminRouter.HandleFunc("/services", adminHandler.ListServices).Methods("GET")
-	adminRouter.HandleFunc("/services", adminHandler.UpdateService).Methods("POST")
-	adminRouter.HandleFunc("/services/{id:[0-9]+}", adminHandler.DeleteService).Methods("DELETE")
+	adminRouter.HandleFunc("/services/new", adminHandler.CreateServiceForm).Methods("GET")
+	adminRouter.HandleFunc("/services", adminHandler.CreateService).Methods("POST")
+	adminRouter.HandleFunc("/services/edit/{id}", adminHandler.UpdateServiceForm).Methods("GET")
+	adminRouter.HandleFunc("/services/{id}", adminHandler.UpdateService).Methods("POST", "PUT")
+	adminRouter.HandleFunc("/services/delete/{id}", adminHandler.DeleteService).Methods("POST")
 
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),
 	)
 
-	port := ":8006"
+	port := ":8057"
 	log.Printf("Сервер запущен на http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, r))
 }
