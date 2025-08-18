@@ -28,5 +28,5 @@ func (h *ServicesHandler) GetAllServices(w http.ResponseWriter, r *http.Request)
 		Services: services,
 	}
 
-	RenderTemplate(w, "admin/services.html", data)
+	RenderTemplate(w, "services.html", data)
 }

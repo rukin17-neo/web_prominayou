@@ -47,7 +47,7 @@ func (r *ServiceRepository) Create(service *Service) error {
 	query := `
 			INSERT INTO services (name, price, duration)
 			VALUES($1, $2, $3)
-			RETURING id
+			RETURNING id
 	`
 	return r.db.QueryRow(
 		query,

@@ -1,0 +1,18 @@
+{{ define "content" }}
+<div class="admin-layout">
+    {{ template "admin_sidebar" . }}
+    <div class="admin-content">
+        {{ block "admin_content" . }} {{ end }}
+    </div>
+</div>
+{{ end }}
+
+{{ define "admin_sidebar" }}
+<aside class="admin-sidebar">
+    <nav>
+        <a href="/admin/services" class="active">Услуги</a>
+        <a href="/admin/users">Пользователи</a>
+        <a href="/admin/settings">Настройки</a>
+    </nav>
+</aside>
+{{ end }}

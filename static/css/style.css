@@ -92,7 +92,7 @@ header {
 
 /* Основное содержимое */
 main {
-  padding-top: 100px; /* Отступ для фиксированного header */
+  padding-top: 160px; /* Больше отступа, чтобы заголовки не прятались под шапкой */
   padding-bottom: 50px;
   min-height: calc(100vh - 150px);
   background-color: var(--dark-black);
@@ -159,4 +159,113 @@ a:hover {
   .content-section {
     padding: 1rem;
   }
+}
+
+/* Стили для админ панели услуг */
+.admin-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #1e1e1e; /* темнее панель админки */
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.4);
+}
+
+.admin-form {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #2a2a2a; /* темный фон формы */
+    border-radius: 5px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--light-gold);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #222;
+    color: #fff;
+}
+
+.btn {
+    padding: 8px 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #45a049;
+}
+
+.btn-primary {
+  background: #3a5f8a;
+}
+
+.btn-secondary {
+  background: #6c757d;
+}
+
+.admin-table {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #f2f2f2;
+}
+
+.btn-edit {
+    padding: 5px 10px;
+    background: #2196F3;
+    color: white;
+    border-radius: 3px;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.btn-delete {
+    padding: 5px 10px;
+    background: #f44336;
+    color: white;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.btn-edit:hover, .btn-delete:hover {
+    opacity: 0.8;
+}
+
+/* Темные таблицы в админке */
+.admin-container table th {
+  background-color: #2a2a2a;
+  color: #f0f0f0;
+}
+
+.admin-container table td {
+  border-bottom: 1px solid #444;
+  color: #ffffff;
 }
