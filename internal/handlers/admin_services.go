@@ -107,6 +107,41 @@ func (h *AdminServicesHandler) CreateService(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Ошибка парсинга формы", http.StatusBadRequest)
+		return
+	}
+
+	// если есть id - редактируем
+	if idStr := r.FormValue("id"); idStr != "" {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "Неверный ID", http.StatusBadRequest)
+			return
+		}
+
+		price, err := strconv.ParseFloat(r.FormValue("price"), 64)
+		if err != nil {
+			http.Error(w, "Неверный формат цены", http.StatusBadRequest)
+			return
+		}
+
+		service := models.Service{
+			ID:       id,
+			Name:     r.FormValue("name"),
+			Price:    price,
+			Duration: r.FormValue("duration"),
+		}
+
+		if err := h.repo.Update(&service); err != nil {
+			http.Error(w, "Ошибка обновления: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/admin/services", http.StatusSeeOther)
+		return
+	}
+
 	var service models.Service
 	if r.Header.Get("Content-Type") == "application/json" {
 		if err := json.NewDecoder(r.Body).Decode(&service); err != nil {
@@ -114,11 +149,6 @@ func (h *AdminServicesHandler) CreateService(w http.ResponseWriter, r *http.Requ
 			return
 		}
 	} else {
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Ошибка парсинга формы", http.StatusBadRequest)
-			return
-		}
-
 		price, err := strconv.ParseFloat(r.FormValue("price"), 64)
 		if err != nil {
 			http.Error(w, "Неверный формат цены", http.StatusBadRequest)

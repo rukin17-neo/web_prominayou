@@ -64,7 +64,7 @@ func main() {
 		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),
 	)
 
-	port := ":8055"
+	port := ":8057"
 	log.Printf("Сервер запущен на http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, r))
 }
