@@ -1,4 +1,49 @@
 {{ define "content" }}
-    <h1>Добро пожаловать!</h1>
-    <p>Основной контент главной страницы</p>
+<section class="hero-section">
+    <!-- фоновое изображение -->
+    <div class="section_image_container">
+        <div id="section_image_de41a73e7b154889991924be7ce4648b" 
+             class="section-image" 
+             style="background-image: url('//m-files.cdn1.cc/lpfile/0/3/0/030d6930f204839988fb60f88981d1e5.jpeg'); 
+                    background-position: 50% 50%; 
+                    background-repeat: no-repeat; 
+                    filter: none;">
+        </div>
+    </div>
+    
+    <!-- контент поверх изображения -->
+    <div class="hero-content">
+        <!-- логотип ProminaYou -->
+        <div class="logo-container">
+            <img src="/static/images/logo/f(1).png" alt="ProminaYou Logo" class="hero-logo">
+            <div class="logo-subtitle">Массажный салон</div>
+        </div>
+        
+        <p>Профессиональный массаж в уютной атмосфере</p>
+        <div class="hero-buttons">
+            <a href="/services" class="btn btn-primary">Наши услуги</a>
+            <a href="/masters" class="btn btn-secondary">Наши мастера</a>
+        </div>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="container">
+        <h2>Почему выбирают нас</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Профессионализм</h3>
+                <p>Опытные мастера с многолетним стажем</p>
+            </div>
+            <div class="feature-card">
+                <h3>Уютная атмосфера</h3>
+                <p>Комфортные условия для полного расслабления</p>
+            </div>
+            <div class="feature-card">
+                <h3>Высокое качество</h3>
+                <p>Используем только лучшие материалы и техники</p>
+            </div>
+        </div>
+    </div>
+</section>
 {{ end }}

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"prommsc/config"
 	"prommsc/internal/handlers"
+	adminHandlers "prommsc/internal/handlers/admin"
+	clientHandlers "prommsc/internal/handlers/client"
 	"prommsc/models"
 	"time"
 
@@ -40,19 +42,43 @@ func main() {
 	}
 
 	serviceRepo := models.NewServiceRepository(db)
-	servicesHandler := handlers.NewServicesHandler(serviceRepo)
-	adminHandler := handlers.NewAdminServicesHandler(serviceRepo)
+	servicesHandler := clientHandlers.NewServicesHandler(serviceRepo)
+	adminHandler := adminHandlers.NewAdminServicesHandler(serviceRepo)
+
+	mastersRepo := models.NewMastersRepository(db)
+	if err := mastersRepo.InitSchema(); err != nil {
+		log.Fatalf("Не удалось создать таблицу masters: %v", err)
+	}
+	mastersHandler := clientHandlers.NewMastersHandler(mastersRepo)
+
+	// admin handler
+	adminDashboard := adminHandlers.AdminDashboard
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", handlers.HomeHandler).Methods("GET")
+	r.HandleFunc("/", clientHandlers.HomeHandler).Methods("GET")
 	r.HandleFunc("/services", servicesHandler.GetAllServices).Methods("GET")
-	r.HandleFunc("/contacts", handlers.ContactsHandler).Methods("GET")
-	r.HandleFunc("/reviews", handlers.ReviewsHandler).Methods("GET")
+	r.HandleFunc("/contacts", clientHandlers.ContactsHandler).Methods("GET")
+	r.HandleFunc("/reviews", clientHandlers.ReviewsHandler).Methods("GET")
+	r.HandleFunc("/masters", mastersHandler.List).Methods("GET")
+
+	r.HandleFunc("/masters/photo/{id}", mastersHandler.GetPhoto).Methods("GET")
 
 	adminRouter := r.PathPrefix("/admin").Subrouter()
 	adminRouter.Use(handlers.AuthMiddleware)
 
+	// /admin
+	adminRouter.HandleFunc("", adminDashboard).Methods("GET")
+
+	// /admin/masters
+	adminMasters := adminHandlers.NewAdminMastersHandler(mastersRepo)
+	adminRouter.HandleFunc("/masters", adminMasters.List).Methods("GET")
+	adminRouter.HandleFunc("/masters", adminMasters.CreateOrUpdate).Methods("POST")
+	adminRouter.HandleFunc("/masters/delete", adminMasters.Delete).Methods("POST")
+
+	adminRouter.HandleFunc("/masters/photo/{id}", adminMasters.GetPhoto).Methods("GET")
+
+	// /admin/services
 	adminRouter.HandleFunc("/services", adminHandler.ListServices).Methods("GET")
 	adminRouter.HandleFunc("/services/new", adminHandler.CreateServiceForm).Methods("GET")
 	adminRouter.HandleFunc("/services", adminHandler.CreateService).Methods("POST")
@@ -64,7 +90,7 @@ func main() {
 		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),
 	)
 
-	port := ":8057"
+	port := ":8096"
 	log.Printf("Сервер запущен на http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, r))
 }

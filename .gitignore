@@ -31,3 +31,22 @@ go.work.sum
 # .idea/
 # .vscode/
 .env
+
+# Temporary and build files
+tmp/
+app
+web
+myapp
+main
+
+# Development tools
+bin/air
+
+# SQL scripts (temporary)
+update_database.sql
+fix_database.sql
+database_*.sql
+
+# Go build artifacts
+*.go~
+*.tmp

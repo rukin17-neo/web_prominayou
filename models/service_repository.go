@@ -13,7 +13,7 @@ func NewServiceRepository(db *sqlx.DB) *ServiceRepository {
 // Для клиентов сайта
 func (r *ServiceRepository) GetAll() ([]Service, error) {
 	var services []Service
-	query := `Select id, name, price, duration FROM services ORDER BY id`
+	query := `SELECT id, name, price, duration FROM services ORDER BY id`
 	err := r.db.Select(&services, query)
 	return services, err
 }
@@ -21,10 +21,9 @@ func (r *ServiceRepository) GetAll() ([]Service, error) {
 // Админка
 func (r *ServiceRepository) GetById(id int) (*Service, error) {
 	var service Service
-	query := `Select id, name, price, duration FROM services WHERE id = $1`
+	query := `SELECT id, name, price, duration FROM services WHERE id = $1`
 	err := r.db.Get(&service, query, id)
 	return &service, err
-
 }
 
 func (r *ServiceRepository) Update(service *Service) error {

@@ -1,0 +1,62 @@
+{{ define "content" }}
+<div class="admin-container">
+  <h2>{{ .Title }}</h2>
+  <form action="/admin/masters" method="POST" enctype="multipart/form-data" class="admin-form">
+    {{ if .EditMaster }}
+      <input type="hidden" name="id" value="{{ .EditMaster.ID }}">
+    {{ end }}
+    <div class="form-group">
+      <label>Имя</label>
+      <input type="text" name="first_name" value="{{ if .EditMaster }}{{ .EditMaster.FirstName }}{{ end }}" required>
+    </div>
+    <div class="form-group">
+      <label>Фамилия</label>
+      <input type="text" name="last_name" value="{{ if .EditMaster }}{{ .EditMaster.LastName }}{{ end }}" required>
+    </div>
+    <div class="form-group">
+      <label>Фото (jpg/png/webp)</label>
+      <input type="file" name="photo" {{ if not .EditMaster }}required{{ end }}>
+      {{ if .EditMaster }}
+        <div style="margin-top:8px">
+          Текущее фото: <img src="{{ .EditMaster.PhotoURL }}" alt="" class="master-photo">
+        </div>
+      {{ end }}
+    </div>
+    <button type="submit" class="btn btn-primary">{{ if .EditMaster }}Сохранить{{ else }}Добавить{{ end }}</button>
+  </form>
+
+  <div class="admin-table">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Фото</th>
+          <th>Имя</th>
+          <th>Фамилия</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range .Masters }}
+        <tr>
+          <td>{{ .ID }}</td>
+          <td><img src="{{ .PhotoURL }}" class="master-photo" alt=""></td>
+          <td>{{ .FirstName }}</td>
+          <td>{{ .LastName }}</td>
+          <td>
+            <a href="/admin/masters?edit={{ .ID }}" class="btn-edit">Редактировать</a>
+            <form action="/admin/masters/delete" method="POST" style="display:inline">
+              <input type="hidden" name="id" value="{{ .ID }}">
+              <button type="submit" class="btn-delete">Удалить</button>
+            </form>
+          </td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+</div>
+{{ end }}
+
+
+

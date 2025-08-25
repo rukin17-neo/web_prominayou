@@ -1,0 +1,15 @@
+{{ define "content" }}
+<section class="content">
+    <h2>{{ .Title }}</h2>
+    <p>{{ .Content }}</p>
+    <div class="masters-grid">
+        {{ range .Masters }}
+        <div class="master-card">
+            <img src="{{ .PhotoURL }}" alt="{{ .FirstName }} {{ .LastName }}" class="master-photo">
+            <div class="master-name">{{ .FirstName }} {{ .LastName }}</div>
+        </div>
+        {{ end }}
+    </div>
+</section>
+{{ end }}
+
