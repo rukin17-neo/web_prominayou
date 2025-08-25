@@ -3,6 +3,7 @@ package handlers
 import (
 	"html/template"
 	"path/filepath"
+	"prommsc/internal/handlers/shared"
 	"sync"
 )
 
@@ -24,6 +25,9 @@ func InitTemplates() error {
 			"services.html",
 			"contacts.html",
 			"reviews.html",
+			"masters.html",
+			"admin/admin.html",
+			"admin/masters.html",
 			"admin/create_service.html",
 			"admin/edit_service.html",
 			"admin/services.html",
@@ -47,6 +51,9 @@ func InitTemplates() error {
 
 			templateCache[tmpl] = t
 		}
+
+		// устанавливаем кэш в shared пакете
+		shared.SetTemplateCache(templateCache)
 	})
 	return initErr
 }
