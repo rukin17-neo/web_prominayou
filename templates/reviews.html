@@ -2,8 +2,24 @@
 <section class="content">
     <h2>{{.Title}}</h2>
     <p>{{.Content}}</p>
-    <div class="image-container">
-        <img src="/static/images/f(2).png" alt="Описание фото" class="golden-image">
+    
+    <div class="reviews-container">
+        {{range .Reviews}}
+        <div class="review-card">
+            <div class="review-header">
+                <div class="review-author">{{.Author}}</div>
+                <div class="review-rating">
+                    {{if ge .Rating 1}}<span class="star">⭐</span>{{end}}
+                    {{if ge .Rating 2}}<span class="star">⭐</span>{{end}}
+                    {{if ge .Rating 3}}<span class="star">⭐</span>{{end}}
+                    {{if ge .Rating 4}}<span class="star">⭐</span>{{end}}
+                    {{if ge .Rating 5}}<span class="star">⭐</span>{{end}}
+                </div>
+            </div>
+            <div class="review-text">{{.Text}}</div>
+            <div class="review-date">{{.Created.Format "02.01.2006"}}</div>
+        </div>
+        {{end}}
     </div>
 </section>
 {{end}}

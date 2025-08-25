@@ -1,7 +1,8 @@
-package handlers
+package client
 
 import (
 	"net/http"
+	"prommsc/internal/handlers/shared"
 	"prommsc/models"
 )
 
@@ -10,5 +11,5 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		Title:   "ProminaYou - Главная",
 		Content: "Добро пожаловать на наш сайт!",
 	}
-	RenderTemplate(w, "index.html", data)
+	shared.RenderTemplate(w, "index.html", data)
 }

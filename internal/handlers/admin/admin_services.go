@@ -1,9 +1,10 @@
-package handlers
+package admin
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"prommsc/internal/handlers/shared"
 	"prommsc/models"
 	"strconv"
 
@@ -15,9 +16,7 @@ type AdminServicesHandler struct {
 }
 
 func NewAdminServicesHandler(repo *models.ServiceRepository) *AdminServicesHandler {
-	return &AdminServicesHandler{
-		repo: repo,
-	}
+	return &AdminServicesHandler{repo: repo}
 }
 
 // форма создания услуг
@@ -27,7 +26,7 @@ func (h *AdminServicesHandler) CreateServiceForm(w http.ResponseWriter, r *http.
 		return
 	}
 
-	RenderTemplate(w, "admin/create_service.html", struct {
+	shared.RenderTemplate(w, "admin/create_service.html", struct {
 		Title string
 	}{
 		Title: "Добавление новой услуги",
@@ -54,7 +53,7 @@ func (h *AdminServicesHandler) UpdateServiceForm(w http.ResponseWriter, r *http.
 		return
 	}
 
-	RenderTemplate(w, "admin/edit_service.html", struct {
+	shared.RenderTemplate(w, "admin/edit_service.html", struct {
 		Title   string
 		Service *models.Service
 	}{
@@ -85,7 +84,7 @@ func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	RenderTemplate(w, "admin/services.html", struct {
+	shared.RenderTemplate(w, "admin/services.html", struct {
 		Title       string
 		Services    []models.Service
 		EditService *models.Service
@@ -198,7 +197,7 @@ func (h *AdminServicesHandler) UpdateService(w http.ResponseWriter, r *http.Requ
 			Title:   "Редактирование услуги",
 			Service: *service,
 		}
-		RenderTemplate(w, "admin/edit_service.html", data)
+		shared.RenderTemplate(w, "admin/edit_service.html", data)
 		return
 	}
 
@@ -248,14 +247,8 @@ func (h *AdminServicesHandler) DeleteService(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	log.Printf("DeleteService: method=%s, form_id=%q, query_id=%q, path_id=%q", r.Method, r.Form.Get("id"), r.URL.Query().Get("id"), mux.Vars(r)["id"])
-	idStr := r.Form.Get("id")
-	if idStr == "" {
-		idStr = r.URL.Query().Get("id")
-	}
-	if idStr == "" {
-		idStr = mux.Vars(r)["id"]
-	}
-	id, err := strconv.Atoi(idStr)
+
+	id, err := strconv.Atoi(r.FormValue("id"))
 	if err != nil {
 		http.Error(w, "Неверный ID", http.StatusBadRequest)
 		return
@@ -266,11 +259,5 @@ func (h *AdminServicesHandler) DeleteService(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if r.Header.Get("Accept") == "application/json" {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"status": "success"})
-	} else {
-		http.Redirect(w, r, "/admin/services", http.StatusSeeOther)
-	}
+	http.Redirect(w, r, "/admin/services", http.StatusSeeOther)
 }

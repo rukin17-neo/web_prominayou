@@ -1,7 +1,8 @@
-package handlers
+package client
 
 import (
 	"net/http"
+	"prommsc/internal/handlers/shared"
 	"prommsc/models"
 )
 
@@ -28,5 +29,5 @@ func (h *ServicesHandler) GetAllServices(w http.ResponseWriter, r *http.Request)
 		Services: services,
 	}
 
-	RenderTemplate(w, "services.html", data)
+	shared.RenderTemplate(w, "services.html", data)
 }

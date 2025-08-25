@@ -1,7 +1,8 @@
-package handlers
+package client
 
 import (
 	"net/http"
+	"prommsc/internal/handlers/shared"
 	"prommsc/models"
 )
 
@@ -15,5 +16,5 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 		Phone:   "+7 (966) 055-00-77",
 	}
 
-	RenderTemplate(w, "contacts.html", data)
+	shared.RenderTemplate(w, "contacts.html", data)
 }

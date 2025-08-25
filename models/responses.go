@@ -11,3 +11,8 @@ type ContactsData struct {
 	Phone   string
 	Email   string
 }
+
+type ReviewsData struct {
+	PageData
+	Reviews []Review
+}

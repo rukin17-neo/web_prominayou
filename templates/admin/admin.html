@@ -1,0 +1,20 @@
+{{ define "content" }}
+<div class="admin-container">
+    <h2>{{ .Title }}</h2>
+    <p class="admin-description">{{ .Content }}</p>
+    
+    <div class="admin-dashboard">
+        <div class="dashboard-card">
+            <h3>Управление мастерами</h3>
+            <p>Добавляйте, редактируйте и удаляйте мастеров, загружайте их фотографии</p>
+            <a href="/admin/masters" class="btn btn-primary btn-lg">Мастера</a>
+        </div>
+        
+        <div class="dashboard-card">
+            <h3>Управление услугами</h3>
+            <p>Создавайте, редактируйте и удаляйте услуги, устанавливайте цены и длительность</p>
+            <a href="/admin/services" class="btn btn-primary btn-lg">Услуги</a>
+        </div>
+    </div>
+</div>
+{{ end }}
