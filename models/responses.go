@@ -1,8 +1,9 @@
 package models
 
 type PageData struct {
-	Title   string
-	Content string
+	Title       string
+	Content     string
+	CurrentUser *User
 }
 
 type ContactsData struct {

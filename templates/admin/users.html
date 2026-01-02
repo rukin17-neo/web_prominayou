@@ -1,0 +1,95 @@
+{{ define "content" }}
+<div class="admin-layout" style="display: flex; min-height: 500px;">
+    <aside class="admin-sidebar" style="width: 200px; background: #2a2a2a; padding: 20px; border-radius: 4px; margin-right: 20px;">
+        <nav style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="/admin" style="color: #f0f0f0; text-decoration: none; padding: 10px; border-radius: 4px;">Главная</a>
+            <a href="/admin/services" style="color: #f0f0f0; text-decoration: none; padding: 10px; border-radius: 4px;">Услуги</a>
+            <a href="/admin/masters" style="color: #f0f0f0; text-decoration: none; padding: 10px; border-radius: 4px;">Мастера</a>
+            <a href="/admin/users" style="color: #f0f0f0; text-decoration: none; padding: 10px; background: var(--light-gold); border-radius: 4px;">Пользователи</a>
+        </nav>
+    </aside>
+    <div class="admin-content" style="flex: 1;">
+        {{ if .CurrentUser }}
+        <div class="admin-header" style="background: #2a2a2a; padding: 15px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;">
+            <div style="color: #f0f0f0;">
+                Вы вошли как: <strong style="color: var(--light-gold);">{{ .CurrentUser.Username }}</strong>
+            </div>
+            <form action="/admin/logout" method="POST" style="margin: 0;">
+                <button type="submit" class="btn btn-secondary" style="padding: 8px 16px;">Выйти</button>
+            </form>
+        </div>
+        {{ end }}
+        <div class="admin-container">
+          <h2>{{ .Title }}</h2>
+
+          <form action="/admin/users" method="POST" class="admin-form">
+            {{ if .EditUser }}
+              <input type="hidden" name="id" value="{{ .EditUser.ID }}">
+              <h3 style="margin-bottom: 20px;">Редактировать пользователя</h3>
+            {{ else }}
+              <h3 style="margin-bottom: 20px;">Добавить пользователя</h3>
+            {{ end }}
+
+            <div class="form-group">
+              <label for="username">Имя пользователя:</label>
+              <input type="text" id="username" name="username" value="{{ if .EditUser }}{{ .EditUser.Username }}{{ end }}" required class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input type="email" id="email" name="email" value="{{ if .EditUser }}{{ .EditUser.Email }}{{ end }}" required class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="password">Пароль {{ if .EditUser }}(оставьте пустым, чтобы не менять){{ end }}:</label>
+              <input type="password" id="password" name="password" {{ if not .EditUser }}required{{ end }} minlength="8" class="form-control">
+              <small style="color: #aaa; font-size: 12px; margin-top: 5px; display: block;">Минимум 8 символов</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+              {{ if .EditUser }}Сохранить изменения{{ else }}Добавить пользователя{{ end }}
+            </button>
+            {{ if .EditUser }}
+              <a href="/admin/users" class="btn btn-secondary" style="margin-left: 10px;">Отмена</a>
+            {{ end }}
+          </form>
+
+          <h3 style="margin-top: 40px; margin-bottom: 20px;">Список пользователей</h3>
+          <div class="admin-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Имя пользователя</th>
+                  <th>Email</th>
+                  <th>Дата создания</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ range .Users }}
+                <tr {{ if and $.EditUser (eq .ID $.EditUser.ID) }}style="background-color: #3a3a3a;"{{ end }}>
+                  <td>{{ .ID }}</td>
+                  <td>{{ .Username }}</td>
+                  <td>{{ .Email }}</td>
+                  <td>{{ .CreatedAt.Format "02.01.2006 15:04" }}</td>
+                  <td>
+                    <a href="/admin/users?edit={{ .ID }}" class="btn-edit">Редактировать</a>
+                    {{ if ne .ID $.CurrentUserID }}
+                    <form action="/admin/users/delete" method="POST" style="display:inline; margin-left: 5px;">
+                      <input type="hidden" name="id" value="{{ .ID }}">
+                      <button type="submit" class="btn-delete" onclick="return confirm('Удалить пользователя {{ .Username }}?')">Удалить</button>
+                    </form>
+                    {{ else }}
+                    <span style="color: #666; font-size: 12px;">(Текущий пользователь)</span>
+                    {{ end }}
+                  </td>
+                </tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
+</div>
+{{ end }}

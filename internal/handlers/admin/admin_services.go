@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"prommsc/internal/handlers"
 	"prommsc/internal/handlers/shared"
 	"prommsc/models"
 	"strconv"
@@ -27,9 +28,11 @@ func (h *AdminServicesHandler) CreateServiceForm(w http.ResponseWriter, r *http.
 	}
 
 	shared.RenderTemplate(w, "admin/create_service.html", struct {
-		Title string
+		Title       string
+		CurrentUser *models.User
 	}{
-		Title: "Добавление новой услуги",
+		Title:       "Добавление новой услуги",
+		CurrentUser: handlers.GetCurrentUser(r),
 	})
 }
 
@@ -54,11 +57,13 @@ func (h *AdminServicesHandler) UpdateServiceForm(w http.ResponseWriter, r *http.
 	}
 
 	shared.RenderTemplate(w, "admin/edit_service.html", struct {
-		Title   string
-		Service *models.Service
+		Title       string
+		Service     *models.Service
+		CurrentUser *models.User
 	}{
-		Title:   "Редактирование услуги",
-		Service: service,
+		Title:       "Редактирование услуги",
+		Service:     service,
+		CurrentUser: handlers.GetCurrentUser(r),
 	})
 }
 
@@ -88,10 +93,12 @@ func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Reque
 		Title       string
 		Services    []models.Service
 		EditService *models.Service
+		CurrentUser *models.User
 	}{
 		Title:       "Управление услугами",
 		Services:    services,
 		EditService: editService,
+		CurrentUser: handlers.GetCurrentUser(r),
 	})
 }
 

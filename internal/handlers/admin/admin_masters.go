@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"prommsc/internal/handlers"
 	"prommsc/internal/handlers/shared"
 	"prommsc/models"
 	"strconv"
@@ -36,14 +37,16 @@ func (h *AdminMastersHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type pageData struct {
-		Title      string
-		Masters    []models.Master
-		EditMaster *models.Master
+		Title       string
+		Masters     []models.Master
+		EditMaster  *models.Master
+		CurrentUser *models.User
 	}
 	shared.RenderTemplate(w, "admin/masters.html", pageData{
-		Title:      "Мастера",
-		Masters:    masters,
-		EditMaster: editMaster,
+		Title:       "Мастера",
+		Masters:     masters,
+		EditMaster:  editMaster,
+		CurrentUser: handlers.GetCurrentUser(r),
 	})
 }
 

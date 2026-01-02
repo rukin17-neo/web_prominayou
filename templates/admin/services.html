@@ -1,54 +1,76 @@
 {{ define "content" }}
-<div class="admin-container">
-    <h2>Управление услугами</h2>
-    
-    <form action="/admin/services" method="POST" class="admin-form">
-        {{ if .EditService }}
-        <input type="hidden" name="id" value="{{ .EditService.ID }}">
+<div class="admin-layout" style="display: flex; min-height: 500px;">
+    <aside class="admin-sidebar" style="width: 200px; background: #2a2a2a; padding: 20px; border-radius: 4px; margin-right: 20px;">
+        <nav style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="/admin" style="color: #f0f0f0; text-decoration: none; padding: 10px; border-radius: 4px;">Главная</a>
+            <a href="/admin/services" style="color: #f0f0f0; text-decoration: none; padding: 10px; background: var(--light-gold); border-radius: 4px;">Услуги</a>
+            <a href="/admin/masters" style="color: #f0f0f0; text-decoration: none; padding: 10px; border-radius: 4px;">Мастера</a>
+            <a href="/admin/users" style="color: #f0f0f0; text-decoration: none; padding: 10px; border-radius: 4px;">Пользователи</a>
+        </nav>
+    </aside>
+    <div class="admin-content" style="flex: 1;">
+        {{ if .CurrentUser }}
+        <div class="admin-header" style="background: #2a2a2a; padding: 15px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;">
+            <div style="color: #f0f0f0;">
+                Вы вошли как: <strong style="color: var(--light-gold);">{{ .CurrentUser.Username }}</strong>
+            </div>
+            <form action="/admin/logout" method="POST" style="margin: 0;">
+                <button type="submit" class="btn btn-secondary" style="padding: 8px 16px;">Выйти</button>
+            </form>
+        </div>
         {{ end }}
-        <div class="form-group">
-            <label for="name">Название услуги:</label>
-            <input type="text" id="name" name="name" required class="form-control" value="{{ if .EditService }}{{ .EditService.Name }}{{ end }}">
-        </div>
-        <div class="form-group">
-            <label for="price">Цена:</label>
-            <input type="number" id="price" name="price" step="0.01" min="0" required class="form-control" value="{{ if .EditService }}{{ printf "%.2f" .EditService.Price }}{{ end }}">
-        </div>
-        <div class="form-group">
-            <label for="duration">Длительность:</label>
-            <input type="text" id="duration" name="duration" required class="form-control" value="{{ if .EditService }}{{ .EditService.Duration }}{{ end }}">
-        </div>
-        <button type="submit" class="btn btn-primary">{{ if .EditService }}Сохранить изменения{{ else }}Добавить услугу{{ end }}</button>
-    </form>
+        <div class="admin-container">
+            <h2>Управление услугами</h2>
 
-    <div class="admin-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Цена</th>
-                    <th>Длительность</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{ range .Services }}
-                <tr>
-                    <td>{{ .ID }}</td>
-                    <td>{{ .Name }}</td>
-                    <td>{{ printf "%.2f" .Price }} ₽</td>
-                    <td>{{ .Duration }}</td>
-                    <td>
-                        <a href="/admin/services?edit={{ .ID }}" class="btn-edit">Редактировать</a>
-                        <form action="/admin/services/delete/{{ .ID }}" method="POST" style="display:inline;">
-                            <button type="submit" class="btn-delete">Удалить</button>
-                        </form>
-                    </td>
-                </tr>
+            <form action="/admin/services" method="POST" class="admin-form">
+                {{ if .EditService }}
+                <input type="hidden" name="id" value="{{ .EditService.ID }}">
                 {{ end }}
-            </tbody>
-        </table>
+                <div class="form-group">
+                    <label for="name">Название услуги:</label>
+                    <input type="text" id="name" name="name" required class="form-control" value="{{ if .EditService }}{{ .EditService.Name }}{{ end }}">
+                </div>
+                <div class="form-group">
+                    <label for="price">Цена:</label>
+                    <input type="number" id="price" name="price" step="0.01" min="0" required class="form-control" value="{{ if .EditService }}{{ printf "%.2f" .EditService.Price }}{{ end }}">
+                </div>
+                <div class="form-group">
+                    <label for="duration">Длительность:</label>
+                    <input type="text" id="duration" name="duration" required class="form-control" value="{{ if .EditService }}{{ .EditService.Duration }}{{ end }}">
+                </div>
+                <button type="submit" class="btn btn-primary">{{ if .EditService }}Сохранить изменения{{ else }}Добавить услугу{{ end }}</button>
+            </form>
+
+            <div class="admin-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Цена</th>
+                            <th>Длительность</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range .Services }}
+                        <tr>
+                            <td>{{ .ID }}</td>
+                            <td>{{ .Name }}</td>
+                            <td>{{ printf "%.2f" .Price }} ₽</td>
+                            <td>{{ .Duration }}</td>
+                            <td>
+                                <a href="/admin/services?edit={{ .ID }}" class="btn-edit">Редактировать</a>
+                                <form action="/admin/services/delete/{{ .ID }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn-delete">Удалить</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 {{ end }}

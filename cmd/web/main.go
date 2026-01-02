@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"prommsc/config"
+	"prommsc/internal/auth"
 	"prommsc/internal/handlers"
 	adminHandlers "prommsc/internal/handlers/admin"
 	clientHandlers "prommsc/internal/handlers/client"
@@ -51,6 +52,25 @@ func main() {
 	}
 	mastersHandler := clientHandlers.NewMastersHandler(mastersRepo)
 
+	// Инициализация auth repositories
+	userRepo := models.NewUserRepository(db)
+	if err := userRepo.InitSchema(); err != nil {
+		log.Fatalf("Не удалось создать таблицу users: %v", err)
+	}
+
+	sessionRepo := models.NewSessionRepository(db)
+	if err := sessionRepo.InitSchema(); err != nil {
+		log.Fatalf("Не удалось создать таблицу sessions: %v", err)
+	}
+
+	// Создание session manager
+	sessionManager := auth.NewSessionManager(sessionRepo, userRepo)
+	handlers.SetSessionManager(sessionManager)
+
+	// Создание auth handlers
+	authHandler := adminHandlers.NewAdminAuthHandler(userRepo, sessionManager)
+	usersHandler := adminHandlers.NewAdminUsersHandler(userRepo)
+
 	// admin handler
 	adminDashboard := adminHandlers.AdminDashboard
 
@@ -63,6 +83,14 @@ func main() {
 	r.HandleFunc("/masters", mastersHandler.List).Methods("GET")
 
 	r.HandleFunc("/masters/photo/{id}", mastersHandler.GetPhoto).Methods("GET")
+
+	// Публичные auth маршруты (ДО middleware)
+	r.HandleFunc("/admin/login", authHandler.LoginPage).Methods("GET")
+	r.HandleFunc("/admin/login", authHandler.Login).Methods("POST")
+	r.HandleFunc("/admin/forgot-password", authHandler.ForgotPasswordPage).Methods("GET")
+	r.HandleFunc("/admin/forgot-password", authHandler.ForgotPassword).Methods("POST")
+	r.HandleFunc("/admin/reset-password", authHandler.ResetPasswordPage).Methods("GET")
+	r.HandleFunc("/admin/reset-password", authHandler.ResetPassword).Methods("POST")
 
 	adminRouter := r.PathPrefix("/admin").Subrouter()
 	adminRouter.Use(handlers.AuthMiddleware)
@@ -86,11 +114,32 @@ func main() {
 	adminRouter.HandleFunc("/services/{id}", adminHandler.UpdateService).Methods("POST", "PUT")
 	adminRouter.HandleFunc("/services/delete/{id}", adminHandler.DeleteService).Methods("POST")
 
+	// /admin/logout (защищённый)
+	adminRouter.HandleFunc("/logout", authHandler.Logout).Methods("POST")
+
+	// /admin/users (защищённые)
+	adminRouter.HandleFunc("/users", usersHandler.List).Methods("GET")
+	adminRouter.HandleFunc("/users", usersHandler.CreateOrUpdate).Methods("POST")
+	adminRouter.HandleFunc("/users/delete", usersHandler.Delete).Methods("POST")
+
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),
 	)
 
-	port := ":8002"
+	// Фоновая очистка истекших сессий (каждый час)
+	go func() {
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := sessionManager.CleanupExpiredSessions(); err != nil {
+				log.Printf("Ошибка очистки сессий: %v", err)
+			} else {
+				log.Println("Очистка истекших сессий выполнена")
+			}
+		}
+	}()
+
+	port := ":8003"
 	log.Printf("Сервер запущен на http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, r))
 }

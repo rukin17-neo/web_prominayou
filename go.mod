@@ -4,7 +4,10 @@ go 1.24.3
 
 require github.com/gorilla/mux v1.8.1
 
-require golang.org/x/sys v0.13.0 // indirect
+require (
+	golang.org/x/crypto v0.46.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0

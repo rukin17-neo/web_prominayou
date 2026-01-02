@@ -31,6 +31,10 @@ func InitTemplates() error {
 			"admin/create_service.html",
 			"admin/edit_service.html",
 			"admin/services.html",
+			"admin/login.html",
+			"admin/forgot_password.html",
+			"admin/reset_password.html",
+			"admin/users.html",
 		}
 
 		for _, tmpl := range templates {
