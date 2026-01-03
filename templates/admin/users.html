@@ -15,6 +15,7 @@
                 Вы вошли как: <strong style="color: var(--light-gold);">{{ .CurrentUser.Username }}</strong>
             </div>
             <form action="/admin/logout" method="POST" style="margin: 0;">
+                {{ .CSRFField }}
                 <button type="submit" class="btn btn-secondary" style="padding: 8px 16px;">Выйти</button>
             </form>
         </div>
@@ -23,6 +24,7 @@
           <h2>{{ .Title }}</h2>
 
           <form action="/admin/users" method="POST" class="admin-form">
+            {{ .CSRFField }}
             {{ if .EditUser }}
               <input type="hidden" name="id" value="{{ .EditUser.ID }}">
               <h3 style="margin-bottom: 20px;">Редактировать пользователя</h3>
@@ -77,6 +79,7 @@
                     <a href="/admin/users?edit={{ .ID }}" class="btn-edit">Редактировать</a>
                     {{ if ne .ID $.CurrentUserID }}
                     <form action="/admin/users/delete" method="POST" style="display:inline; margin-left: 5px;">
+                      {{ $.CSRFField }}
                       <input type="hidden" name="id" value="{{ .ID }}">
                       <button type="submit" class="btn-delete" onclick="return confirm('Удалить пользователя {{ .Username }}?')">Удалить</button>
                     </form>

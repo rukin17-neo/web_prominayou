@@ -29,5 +29,5 @@ func (h *ServicesHandler) GetAllServices(w http.ResponseWriter, r *http.Request)
 		Services: services,
 	}
 
-	shared.RenderTemplate(w, "services.html", data)
+	shared.RenderTemplate(w, r, "services.html", data)
 }

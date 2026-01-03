@@ -8,6 +8,7 @@ import (
 	"prommsc/internal/handlers"
 	adminHandlers "prommsc/internal/handlers/admin"
 	clientHandlers "prommsc/internal/handlers/client"
+	"prommsc/internal/middleware"
 	"prommsc/models"
 	"time"
 
@@ -40,6 +41,11 @@ func main() {
 
 	if err := handlers.InitTemplates(); err != nil {
 		log.Fatalf("Ошибка загрузки шаблонов: %v", err)
+	}
+
+	// Initialize rate limiters
+	if err := middleware.InitRateLimiters(); err != nil {
+		log.Fatalf("Failed to initialize rate limiters: %v", err)
 	}
 
 	serviceRepo := models.NewServiceRepository(db)
@@ -84,43 +90,65 @@ func main() {
 
 	r.HandleFunc("/masters/photo/{id}", mastersHandler.GetPhoto).Methods("GET")
 
-	// Публичные auth маршруты (ДО middleware)
-	r.HandleFunc("/admin/login", authHandler.LoginPage).Methods("GET")
-	r.HandleFunc("/admin/login", authHandler.Login).Methods("POST")
-	r.HandleFunc("/admin/forgot-password", authHandler.ForgotPasswordPage).Methods("GET")
-	r.HandleFunc("/admin/forgot-password", authHandler.ForgotPassword).Methods("POST")
-	r.HandleFunc("/admin/reset-password", authHandler.ResetPasswordPage).Methods("GET")
-	r.HandleFunc("/admin/reset-password", authHandler.ResetPassword).Methods("POST")
-
+	// Admin subrouter with CSRF protection for ALL admin routes
 	adminRouter := r.PathPrefix("/admin").Subrouter()
-	adminRouter.Use(handlers.AuthMiddleware)
+	adminRouter.Use(middleware.CSRFProtection())
 
-	// /admin
-	adminRouter.HandleFunc("", adminDashboard).Methods("GET")
+	// Public auth routes on admin subrouter (get CSRF protection)
+	// Login with strict rate limiting
+	adminRouter.HandleFunc("/login", authHandler.LoginPage).Methods("GET")
+	adminRouter.Handle("/login", middleware.RateLimitLogin()(
+		http.HandlerFunc(authHandler.Login))).Methods("POST")
 
-	// /admin/masters
+	// Forgot password with strict rate limiting
+	adminRouter.HandleFunc("/forgot-password", authHandler.ForgotPasswordPage).Methods("GET")
+	adminRouter.Handle("/forgot-password", middleware.RateLimitForgotPassword()(
+		http.HandlerFunc(authHandler.ForgotPassword))).Methods("POST")
+
+	// Reset password with strict rate limiting
+	adminRouter.HandleFunc("/reset-password", authHandler.ResetPasswordPage).Methods("GET")
+	adminRouter.Handle("/reset-password", middleware.RateLimitResetPassword()(
+		http.HandlerFunc(authHandler.ResetPassword))).Methods("POST")
+
+	// Protected routes - create nested subrouter with AuthMiddleware
+	protectedRouter := adminRouter.NewRoute().Subrouter()
+	protectedRouter.Use(handlers.AuthMiddleware)
+
+	// Dashboard
+	protectedRouter.HandleFunc("", adminDashboard).Methods("GET")
+
+	// Masters with CRUD rate limiting
 	adminMasters := adminHandlers.NewAdminMastersHandler(mastersRepo)
-	adminRouter.HandleFunc("/masters", adminMasters.List).Methods("GET")
-	adminRouter.HandleFunc("/masters", adminMasters.CreateOrUpdate).Methods("POST")
-	adminRouter.HandleFunc("/masters/delete", adminMasters.Delete).Methods("POST")
+	protectedRouter.Handle("/masters", middleware.RateLimitCRUD()(
+		http.HandlerFunc(adminMasters.List))).Methods("GET")
+	protectedRouter.Handle("/masters", middleware.RateLimitCRUD()(
+		http.HandlerFunc(adminMasters.CreateOrUpdate))).Methods("POST")
+	protectedRouter.Handle("/masters/delete", middleware.RateLimitCRUD()(
+		http.HandlerFunc(adminMasters.Delete))).Methods("POST")
+	protectedRouter.HandleFunc("/masters/photo/{id}", adminMasters.GetPhoto).Methods("GET")
 
-	adminRouter.HandleFunc("/masters/photo/{id}", adminMasters.GetPhoto).Methods("GET")
+	// Services with CRUD rate limiting
+	protectedRouter.Handle("/services", middleware.RateLimitCRUD()(
+		http.HandlerFunc(adminHandler.ListServices))).Methods("GET")
+	protectedRouter.HandleFunc("/services/new", adminHandler.CreateServiceForm).Methods("GET")
+	protectedRouter.Handle("/services", middleware.RateLimitCRUD()(
+		http.HandlerFunc(adminHandler.CreateService))).Methods("POST")
+	protectedRouter.HandleFunc("/services/edit/{id}", adminHandler.UpdateServiceForm).Methods("GET")
+	protectedRouter.Handle("/services/{id}", middleware.RateLimitCRUD()(
+		http.HandlerFunc(adminHandler.UpdateService))).Methods("POST", "PUT")
+	protectedRouter.Handle("/services/delete/{id}", middleware.RateLimitCRUD()(
+		http.HandlerFunc(adminHandler.DeleteService))).Methods("POST")
 
-	// /admin/services
-	adminRouter.HandleFunc("/services", adminHandler.ListServices).Methods("GET")
-	adminRouter.HandleFunc("/services/new", adminHandler.CreateServiceForm).Methods("GET")
-	adminRouter.HandleFunc("/services", adminHandler.CreateService).Methods("POST")
-	adminRouter.HandleFunc("/services/edit/{id}", adminHandler.UpdateServiceForm).Methods("GET")
-	adminRouter.HandleFunc("/services/{id}", adminHandler.UpdateService).Methods("POST", "PUT")
-	adminRouter.HandleFunc("/services/delete/{id}", adminHandler.DeleteService).Methods("POST")
+	// Logout (no rate limiting needed)
+	protectedRouter.HandleFunc("/logout", authHandler.Logout).Methods("POST")
 
-	// /admin/logout (защищённый)
-	adminRouter.HandleFunc("/logout", authHandler.Logout).Methods("POST")
-
-	// /admin/users (защищённые)
-	adminRouter.HandleFunc("/users", usersHandler.List).Methods("GET")
-	adminRouter.HandleFunc("/users", usersHandler.CreateOrUpdate).Methods("POST")
-	adminRouter.HandleFunc("/users/delete", usersHandler.Delete).Methods("POST")
+	// Users with high priority rate limiting
+	protectedRouter.Handle("/users", middleware.RateLimitUserManagement()(
+		http.HandlerFunc(usersHandler.List))).Methods("GET")
+	protectedRouter.Handle("/users", middleware.RateLimitUserManagement()(
+		http.HandlerFunc(usersHandler.CreateOrUpdate))).Methods("POST")
+	protectedRouter.Handle("/users/delete", middleware.RateLimitUserManagement()(
+		http.HandlerFunc(usersHandler.Delete))).Methods("POST")
 
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),

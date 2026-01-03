@@ -2,6 +2,7 @@
 <div class="admin-container">
     <h2>{{ .Title }}</h2>
     <form action="/admin/services/{{ .Service.ID }}" method="POST" class="admin-form">
+        {{ .CSRFField }}
         <input type="hidden" name="_method" value="PUT">
         <div class="form-group">
             <label for="name">Название услуги</label>

@@ -36,7 +36,7 @@ func (h *AdminAuthHandler) LoginPage(w http.ResponseWriter, r *http.Request) {
 		Success: r.URL.Query().Get("success"),
 	}
 
-	shared.RenderTemplate(w, "admin/login.html", data)
+	shared.RenderTemplate(w, r, "admin/login.html", data)
 }
 
 // Login обрабатывает вход пользователя
@@ -52,7 +52,7 @@ func (h *AdminAuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Валидация
 	if username == "" || password == "" {
-		h.renderLoginError(w, "Все поля обязательны")
+		h.renderLoginError(w, r, "Все поля обязательны")
 		return
 	}
 
@@ -60,14 +60,14 @@ func (h *AdminAuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userRepo.GetByUsername(username)
 	if err != nil {
 		log.Printf("Неудачная попытка входа: пользователь=%s, IP=%s", username, r.RemoteAddr)
-		h.renderLoginError(w, "Неверные учетные данные")
+		h.renderLoginError(w, r, "Неверные учетные данные")
 		return
 	}
 
 	// Проверка пароля
 	if err := auth.VerifyPassword(user.PasswordHash, password); err != nil {
 		log.Printf("Неудачная попытка входа: пользователь=%s, IP=%s", username, r.RemoteAddr)
-		h.renderLoginError(w, "Неверные учетные данные")
+		h.renderLoginError(w, r, "Неверные учетные данные")
 		return
 	}
 
@@ -101,7 +101,7 @@ func (h *AdminAuthHandler) ForgotPasswordPage(w http.ResponseWriter, r *http.Req
 		Title: "Восстановление пароля",
 	}
 
-	shared.RenderTemplate(w, "admin/forgot_password.html", data)
+	shared.RenderTemplate(w, r, "admin/forgot_password.html", data)
 }
 
 // ForgotPassword обрабатывает запрос на восстановление пароля
@@ -115,7 +115,7 @@ func (h *AdminAuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request
 
 	// Валидация email (базовая)
 	if email == "" || !strings.Contains(email, "@") {
-		h.renderForgotPasswordSuccess(w) // Показываем success даже при ошибке - security
+		h.renderForgotPasswordSuccess(w, r) // Показываем success даже при ошибке - security
 		return
 	}
 
@@ -124,7 +124,7 @@ func (h *AdminAuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		// Не сообщаем, что email не найден - security best practice
 		log.Printf("Запрос сброса пароля для несуществующего email: %s", email)
-		h.renderForgotPasswordSuccess(w)
+		h.renderForgotPasswordSuccess(w, r)
 		return
 	}
 
@@ -152,7 +152,7 @@ func (h *AdminAuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request
 	}
 
 	log.Printf("Запрос сброса пароля: email=%s, IP=%s", email, r.RemoteAddr)
-	h.renderForgotPasswordSuccess(w)
+	h.renderForgotPasswordSuccess(w, r)
 }
 
 // ResetPasswordPage отображает страницу сброса пароля
@@ -171,7 +171,7 @@ func (h *AdminAuthHandler) ResetPasswordPage(w http.ResponseWriter, r *http.Requ
 			Title: "Сброс пароля",
 			Error: "Токен не указан",
 		}
-		shared.RenderTemplate(w, "admin/reset_password.html", data)
+		shared.RenderTemplate(w, r, "admin/reset_password.html", data)
 		return
 	}
 
@@ -182,7 +182,7 @@ func (h *AdminAuthHandler) ResetPasswordPage(w http.ResponseWriter, r *http.Requ
 			Title: "Сброс пароля",
 			Error: "Неверный или истекший токен",
 		}
-		shared.RenderTemplate(w, "admin/reset_password.html", data)
+		shared.RenderTemplate(w, r, "admin/reset_password.html", data)
 		return
 	}
 
@@ -191,7 +191,7 @@ func (h *AdminAuthHandler) ResetPasswordPage(w http.ResponseWriter, r *http.Requ
 		Title: "Сброс пароля",
 		Token: token,
 	}
-	shared.RenderTemplate(w, "admin/reset_password.html", data)
+	shared.RenderTemplate(w, r, "admin/reset_password.html", data)
 }
 
 // ResetPassword обрабатывает сброс пароля
@@ -207,24 +207,24 @@ func (h *AdminAuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request)
 
 	// Валидация
 	if token == "" || password == "" || passwordConfirm == "" {
-		h.renderResetPasswordError(w, token, "Все поля обязательны")
+		h.renderResetPasswordError(w, r, token, "Все поля обязательны")
 		return
 	}
 
 	if password != passwordConfirm {
-		h.renderResetPasswordError(w, token, "Пароли не совпадают")
+		h.renderResetPasswordError(w, r, token, "Пароли не совпадают")
 		return
 	}
 
 	if len(password) < 8 {
-		h.renderResetPasswordError(w, token, "Пароль должен содержать минимум 8 символов")
+		h.renderResetPasswordError(w, r, token, "Пароль должен содержать минимум 8 символов")
 		return
 	}
 
 	// Получение пользователя по токену
 	user, err := h.userRepo.GetByResetToken(token)
 	if err != nil {
-		h.renderResetPasswordError(w, token, "Неверный или истекший токен")
+		h.renderResetPasswordError(w, r, token, "Неверный или истекший токен")
 		return
 	}
 
@@ -257,7 +257,7 @@ func (h *AdminAuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request)
 
 // Вспомогательные функции для рендера ошибок
 
-func (h *AdminAuthHandler) renderLoginError(w http.ResponseWriter, errorMsg string) {
+func (h *AdminAuthHandler) renderLoginError(w http.ResponseWriter, r *http.Request, errorMsg string) {
 	type pageData struct {
 		Title string
 		Error string
@@ -266,10 +266,10 @@ func (h *AdminAuthHandler) renderLoginError(w http.ResponseWriter, errorMsg stri
 		Title: "Вход",
 		Error: errorMsg,
 	}
-	shared.RenderTemplate(w, "admin/login.html", data)
+	shared.RenderTemplate(w, r, "admin/login.html", data)
 }
 
-func (h *AdminAuthHandler) renderForgotPasswordSuccess(w http.ResponseWriter) {
+func (h *AdminAuthHandler) renderForgotPasswordSuccess(w http.ResponseWriter, r *http.Request) {
 	type pageData struct {
 		Title   string
 		Success bool
@@ -278,10 +278,10 @@ func (h *AdminAuthHandler) renderForgotPasswordSuccess(w http.ResponseWriter) {
 		Title:   "Восстановление пароля",
 		Success: true,
 	}
-	shared.RenderTemplate(w, "admin/forgot_password.html", data)
+	shared.RenderTemplate(w, r, "admin/forgot_password.html", data)
 }
 
-func (h *AdminAuthHandler) renderResetPasswordError(w http.ResponseWriter, token, errorMsg string) {
+func (h *AdminAuthHandler) renderResetPasswordError(w http.ResponseWriter, r *http.Request, token, errorMsg string) {
 	type pageData struct {
 		Title string
 		Token string
@@ -292,5 +292,5 @@ func (h *AdminAuthHandler) renderResetPasswordError(w http.ResponseWriter, token
 		Token: token,
 		Error: errorMsg,
 	}
-	shared.RenderTemplate(w, "admin/reset_password.html", data)
+	shared.RenderTemplate(w, r, "admin/reset_password.html", data)
 }

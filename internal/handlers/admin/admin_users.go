@@ -51,7 +51,7 @@ func (h *AdminUsersHandler) List(w http.ResponseWriter, r *http.Request) {
 		CurrentUser   *models.User
 	}
 
-	shared.RenderTemplate(w, "admin/users.html", pageData{
+	shared.RenderTemplate(w, r, "admin/users.html", pageData{
 		Title:         "Пользователи",
 		Users:         users,
 		EditUser:      editUser,

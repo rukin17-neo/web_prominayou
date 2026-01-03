@@ -42,7 +42,7 @@ func (h *AdminMastersHandler) List(w http.ResponseWriter, r *http.Request) {
 		EditMaster  *models.Master
 		CurrentUser *models.User
 	}
-	shared.RenderTemplate(w, "admin/masters.html", pageData{
+	shared.RenderTemplate(w, r, "admin/masters.html", pageData{
 		Title:       "Мастера",
 		Masters:     masters,
 		EditMaster:  editMaster,

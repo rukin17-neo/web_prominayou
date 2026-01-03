@@ -27,7 +27,7 @@ func (h *AdminServicesHandler) CreateServiceForm(w http.ResponseWriter, r *http.
 		return
 	}
 
-	shared.RenderTemplate(w, "admin/create_service.html", struct {
+	shared.RenderTemplate(w, r, "admin/create_service.html", struct {
 		Title       string
 		CurrentUser *models.User
 	}{
@@ -56,7 +56,7 @@ func (h *AdminServicesHandler) UpdateServiceForm(w http.ResponseWriter, r *http.
 		return
 	}
 
-	shared.RenderTemplate(w, "admin/edit_service.html", struct {
+	shared.RenderTemplate(w, r, "admin/edit_service.html", struct {
 		Title       string
 		Service     *models.Service
 		CurrentUser *models.User
@@ -89,7 +89,7 @@ func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	shared.RenderTemplate(w, "admin/services.html", struct {
+	shared.RenderTemplate(w, r, "admin/services.html", struct {
 		Title       string
 		Services    []models.Service
 		EditService *models.Service
@@ -204,7 +204,7 @@ func (h *AdminServicesHandler) UpdateService(w http.ResponseWriter, r *http.Requ
 			Title:   "Редактирование услуги",
 			Service: *service,
 		}
-		shared.RenderTemplate(w, "admin/edit_service.html", data)
+		shared.RenderTemplate(w, r, "admin/edit_service.html", data)
 		return
 	}
 

@@ -13,5 +13,5 @@ func AdminDashboard(w http.ResponseWriter, r *http.Request) {
 		Content:     "Выберите раздел для управления",
 		CurrentUser: handlers.GetCurrentUser(r),
 	}
-	shared.RenderTemplate(w, "admin/admin.html", data)
+	shared.RenderTemplate(w, r, "admin/admin.html", data)
 }

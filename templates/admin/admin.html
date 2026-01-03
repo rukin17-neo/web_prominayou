@@ -15,6 +15,7 @@
                 Вы вошли как: <strong style="color: var(--light-gold);">{{ .CurrentUser.Username }}</strong>
             </div>
             <form action="/admin/logout" method="POST" style="margin: 0;">
+                {{ .CSRFField }}
                 <button type="submit" class="btn btn-secondary" style="padding: 8px 16px;">Выйти</button>
             </form>
         </div>
