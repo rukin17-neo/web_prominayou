@@ -78,8 +78,8 @@ func (h *AdminUsersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Валидация email (базовая)
-	if !strings.Contains(email, "@") {
+	// Валидация email (regex)
+	if !isValidEmail(email) {
 		http.Error(w, "Неверный формат email", http.StatusBadRequest)
 		return
 	}

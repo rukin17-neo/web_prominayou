@@ -3,6 +3,7 @@ package auth
 import (
 	"log"
 	"net/http"
+	"os"
 	"prommsc/models"
 	"strings"
 	"time"
@@ -25,6 +26,11 @@ func NewSessionManager(sessionRepo *models.SessionRepository, userRepo *models.U
 		sessionRepo: sessionRepo,
 		userRepo:    userRepo,
 	}
+}
+
+// isSecureCookie возвращает значение Secure flag для cookies из переменной окружения
+func isSecureCookie() bool {
+	return os.Getenv("SESSION_SECURE") == "true"
 }
 
 // CreateSession создаёт новую сессию для пользователя
@@ -61,7 +67,7 @@ func (sm *SessionManager) CreateSession(w http.ResponseWriter, r *http.Request, 
 		Path:     "/",
 		MaxAge:   int(duration.Seconds()),
 		HttpOnly: true,
-		Secure:   false, // TODO: установить в true для production с HTTPS
+		Secure:   isSecureCookie(), // Динамически из SESSION_SECURE env
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -115,7 +121,7 @@ func (sm *SessionManager) DestroySession(w http.ResponseWriter, r *http.Request)
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   isSecureCookie(), // Динамически из SESSION_SECURE env
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -126,7 +132,7 @@ func (sm *SessionManager) DestroySession(w http.ResponseWriter, r *http.Request)
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   isSecureCookie(), // Динамически из SESSION_SECURE env
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -175,7 +181,7 @@ func (sm *SessionManager) setRememberToken(w http.ResponseWriter, userID int) er
 		Path:     "/",
 		MaxAge:   int(rememberDuration.Seconds()),
 		HttpOnly: true,
-		Secure:   false, // TODO: установить в true для production
+		Secure:   isSecureCookie(), // Динамически из SESSION_SECURE env
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -183,18 +189,28 @@ func (sm *SessionManager) setRememberToken(w http.ResponseWriter, userID int) er
 }
 
 // getIP извлекает IP адрес из запроса
+// Защита от IP spoofing: использует rightmost IP из X-Forwarded-For
 func getIP(r *http.Request) string {
-	// Проверка на прокси
+	// Проверка X-Forwarded-For (берем последний IP - ближайший к серверу)
+	// Это защищает от spoofing, так как клиент может подделать только начало списка
 	forwarded := r.Header.Get("X-Forwarded-For")
 	if forwarded != "" {
 		parts := strings.Split(forwarded, ",")
-		return strings.TrimSpace(parts[0])
+		// Берем последний IP (rightmost) вместо первого
+		return strings.TrimSpace(parts[len(parts)-1])
 	}
 
+	// X-Real-IP может быть установлен только доверенным proxy
 	realIP := r.Header.Get("X-Real-IP")
 	if realIP != "" {
 		return realIP
 	}
 
-	return r.RemoteAddr
+	// Fallback на RemoteAddr (прямое соединение)
+	// Удаляем порт если есть
+	addr := r.RemoteAddr
+	if idx := strings.LastIndex(addr, ":"); idx != -1 {
+		return addr[:idx]
+	}
+	return addr
 }

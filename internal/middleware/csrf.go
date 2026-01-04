@@ -20,12 +20,15 @@ func CSRFProtection() mux.MiddlewareFunc {
 
 	authKey := []byte(authKeyStr)
 
+	// Динамически определяем Secure flag из переменной окружения
+	isSecure := os.Getenv("SESSION_SECURE") == "true"
+
 	return csrf.Protect(
 		authKey,
-		csrf.Secure(false),                 // TODO: Set true in production with HTTPS
+		csrf.Secure(isSecure),               // Динамически из SESSION_SECURE env
 		csrf.SameSite(csrf.SameSiteLaxMode), // Prevent CSRF attacks
 		csrf.Path("/"),
-		csrf.MaxAge(24*3600),              // 24 hours to match session
+		csrf.MaxAge(24*3600),                // 24 hours to match session
 		csrf.ErrorHandler(csrfErrorHandler()), // Custom error handler
 		csrf.CookieName("prommsc_csrf"),
 		csrf.FieldName("csrf_token"),
@@ -45,20 +48,28 @@ func csrfErrorHandler() http.Handler {
 }
 
 // getIP extracts IP address from request
+// Защита от IP spoofing: использует rightmost IP из X-Forwarded-For
 func getIP(r *http.Request) string {
-	// Check X-Forwarded-For header
+	// Check X-Forwarded-For header (берем последний IP - ближайший к серверу)
+	// Это защищает от spoofing, так как клиент может подделать только начало списка
 	forwarded := r.Header.Get("X-Forwarded-For")
 	if forwarded != "" {
 		parts := strings.Split(forwarded, ",")
-		return strings.TrimSpace(parts[0])
+		// Берем последний IP (rightmost) вместо первого
+		return strings.TrimSpace(parts[len(parts)-1])
 	}
 
-	// Check X-Real-IP header
+	// Check X-Real-IP header (может быть установлен только доверенным proxy)
 	realIP := r.Header.Get("X-Real-IP")
 	if realIP != "" {
 		return realIP
 	}
 
-	// Use RemoteAddr
-	return r.RemoteAddr
+	// Use RemoteAddr (прямое соединение)
+	// Удаляем порт если есть
+	addr := r.RemoteAddr
+	if idx := strings.LastIndex(addr, ":"); idx != -1 {
+		return addr[:idx]
+	}
+	return addr
 }

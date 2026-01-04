@@ -113,8 +113,8 @@ func (h *AdminAuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request
 
 	email := strings.TrimSpace(r.FormValue("email"))
 
-	// Валидация email (базовая)
-	if email == "" || !strings.Contains(email, "@") {
+	// Валидация email (regex)
+	if !isValidEmail(email) {
 		h.renderForgotPasswordSuccess(w, r) // Показываем success даже при ошибке - security
 		return
 	}
