@@ -82,6 +82,9 @@ func main() {
 
 	r := mux.NewRouter()
 
+	// Применяем security headers ко всем маршрутам
+	r.Use(middleware.SecurityHeaders())
+
 	r.HandleFunc("/", clientHandlers.HomeHandler).Methods("GET")
 	r.HandleFunc("/services", servicesHandler.GetAllServices).Methods("GET")
 	r.HandleFunc("/contacts", clientHandlers.ContactsHandler).Methods("GET")

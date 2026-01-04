@@ -22,7 +22,7 @@ func NewAdminUsersHandler(userRepo *models.UserRepository) *AdminUsersHandler {
 func (h *AdminUsersHandler) List(w http.ResponseWriter, r *http.Request) {
 	users, err := h.userRepo.GetAll()
 	if err != nil {
-		http.Error(w, "Ошибка загрузки пользователей: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "GetAllUsers", err, ErrMsgLoadFailed, http.StatusInternalServerError)
 		return
 	}
 
@@ -109,7 +109,7 @@ func (h *AdminUsersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Reques
 				http.Error(w, "Имя пользователя или email уже используется", http.StatusBadRequest)
 				return
 			}
-			http.Error(w, "Ошибка обновления: "+err.Error(), http.StatusInternalServerError)
+			logAndRespondWithError(w, "UpdateUser", err, ErrMsgUpdateFailed, http.StatusInternalServerError)
 			return
 		}
 
@@ -128,7 +128,7 @@ func (h *AdminUsersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Reques
 			}
 
 			if err := h.userRepo.UpdatePassword(id, passwordHash); err != nil {
-				http.Error(w, "Ошибка обновления пароля: "+err.Error(), http.StatusInternalServerError)
+				logAndRespondWithError(w, "UpdatePassword", err, ErrMsgUpdateFailed, http.StatusInternalServerError)
 				return
 			}
 		}
@@ -169,7 +169,7 @@ func (h *AdminUsersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "Имя пользователя или email уже используется", http.StatusBadRequest)
 			return
 		}
-		http.Error(w, "Ошибка создания: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "CreateUser", err, ErrMsgCreateFailed, http.StatusInternalServerError)
 		return
 	}
 
@@ -198,7 +198,7 @@ func (h *AdminUsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// Удаление пользователя
 	if err := h.userRepo.Delete(id); err != nil {
-		http.Error(w, "Ошибка удаления: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "DeleteUser", err, ErrMsgDeleteFailed, http.StatusInternalServerError)
 		return
 	}
 

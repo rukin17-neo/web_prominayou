@@ -70,7 +70,7 @@ func (h *AdminServicesHandler) UpdateServiceForm(w http.ResponseWriter, r *http.
 func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Request) {
 	services, err := h.repo.GetAll()
 	if err != nil {
-		http.Error(w, "Ошибка загрузки услуг: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "GetAllServices", err, ErrMsgLoadFailed, http.StatusInternalServerError)
 		return
 	}
 
@@ -140,7 +140,7 @@ func (h *AdminServicesHandler) CreateService(w http.ResponseWriter, r *http.Requ
 		}
 
 		if err := h.repo.Update(&service); err != nil {
-			http.Error(w, "Ошибка обновления: "+err.Error(), http.StatusInternalServerError)
+			logAndRespondWithError(w, "UpdateService", err, ErrMsgUpdateFailed, http.StatusInternalServerError)
 			return
 		}
 
@@ -169,7 +169,7 @@ func (h *AdminServicesHandler) CreateService(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := h.repo.Create(&service); err != nil {
-		http.Error(w, "Ошибка создания услуги: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "CreateService", err, ErrMsgCreateFailed, http.StatusInternalServerError)
 		return
 	}
 
@@ -262,7 +262,7 @@ func (h *AdminServicesHandler) DeleteService(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := h.repo.Delete(id); err != nil {
-		http.Error(w, "Ошибка удаления: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "DeleteService", err, ErrMsgDeleteFailed, http.StatusInternalServerError)
 		return
 	}
 

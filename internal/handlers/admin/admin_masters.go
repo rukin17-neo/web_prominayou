@@ -100,7 +100,7 @@ func verifyImageMagicBytes(data []byte, expectedType string) error {
 func (h *AdminMastersHandler) List(w http.ResponseWriter, r *http.Request) {
 	masters, err := h.repo.GetAll()
 	if err != nil {
-		http.Error(w, "Ошибка загрузки мастеров: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "GetAllMasters", err, ErrMsgLoadFailed, http.StatusInternalServerError)
 		return
 	}
 
@@ -208,7 +208,7 @@ func (h *AdminMastersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Requ
 		}
 
 		if err := h.repo.Update(&m); err != nil {
-			http.Error(w, "Ошибка обновления: "+err.Error(), http.StatusInternalServerError)
+			logAndRespondWithError(w, "UpdateMaster", err, ErrMsgUpdateFailed, http.StatusInternalServerError)
 			return
 		}
 	} else {
@@ -226,7 +226,7 @@ func (h *AdminMastersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Requ
 		}
 
 		if err := h.repo.Create(&m); err != nil {
-			http.Error(w, "Ошибка создания: "+err.Error(), http.StatusInternalServerError)
+			logAndRespondWithError(w, "CreateMaster", err, ErrMsgCreateFailed, http.StatusInternalServerError)
 			return
 		}
 
@@ -286,7 +286,7 @@ func (h *AdminMastersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.repo.Delete(id); err != nil {
-		http.Error(w, "Ошибка удаления: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "DeleteMaster", err, ErrMsgDeleteFailed, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/admin/masters", http.StatusSeeOther)
