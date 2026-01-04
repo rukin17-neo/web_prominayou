@@ -58,27 +58,38 @@ func (h *AdminAuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// Получение пользователя
 	user, err := h.userRepo.GetByUsername(username)
+
+	// Защита от timing attacks: всегда выполняем bcrypt проверку
+	// Используем либо реальный hash пользователя, либо dummy hash
+	var passwordHash string
 	if err != nil {
-		log.Printf("Неудачная попытка входа: пользователь=%s, IP=%s", username, r.RemoteAddr)
+		// Пользователь не найден - используем dummy hash для константного времени выполнения
+		// Это предварительно сгенерированный bcrypt hash от строки "dummy-password-for-timing-protection"
+		passwordHash = "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5yyC7Jvwm0Z8m"
+	} else {
+		passwordHash = user.PasswordHash
+	}
+
+	// Всегда проверяем пароль (даже если user не найден)
+	// Это гарантирует константное время выполнения
+	passwordValid := auth.VerifyPassword(passwordHash, password) == nil
+
+	// Проверяем оба условия: пользователь найден И пароль верный
+	if err != nil || !passwordValid {
+		// Не логируем username для защиты от user enumeration
+		log.Printf("Неудачная попытка входа: IP=%s", getClientIP(r))
 		h.renderLoginError(w, r, "Неверные учетные данные")
 		return
 	}
 
-	// Проверка пароля
-	if err := auth.VerifyPassword(user.PasswordHash, password); err != nil {
-		log.Printf("Неудачная попытка входа: пользователь=%s, IP=%s", username, r.RemoteAddr)
-		h.renderLoginError(w, r, "Неверные учетные данные")
-		return
-	}
-
-	// Создание сессии
+	// Создание сессии (только если user найден и пароль верный)
 	if err := h.sessionManager.CreateSession(w, r, user.ID, rememberMe); err != nil {
 		log.Printf("Ошибка создания сессии: %v", err)
 		http.Error(w, "Ошибка создания сессии", http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("Успешный вход: пользователь=%s, IP=%s", username, r.RemoteAddr)
+	log.Printf("Успешный вход: пользователь=%s, IP=%s", username, getClientIP(r))
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
 }
 
@@ -216,8 +227,9 @@ func (h *AdminAuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if len(password) < 8 {
-		h.renderResetPasswordError(w, r, token, "Пароль должен содержать минимум 8 символов")
+	// Валидация пароля (длина, сложность)
+	if err := validatePassword(password); err != nil {
+		h.renderResetPasswordError(w, r, token, err.Error())
 		return
 	}
 
@@ -293,4 +305,28 @@ func (h *AdminAuthHandler) renderResetPasswordError(w http.ResponseWriter, r *ht
 		Error: errorMsg,
 	}
 	shared.RenderTemplate(w, r, "admin/reset_password.html", data)
+}
+
+// getClientIP извлекает IP адрес клиента из запроса
+// Защита от IP spoofing: использует rightmost IP из X-Forwarded-For
+func getClientIP(r *http.Request) string {
+	// Проверка X-Forwarded-For (берем последний IP - ближайший к серверу)
+	forwarded := r.Header.Get("X-Forwarded-For")
+	if forwarded != "" {
+		parts := strings.Split(forwarded, ",")
+		return strings.TrimSpace(parts[len(parts)-1])
+	}
+
+	// X-Real-IP может быть установлен только доверенным proxy
+	realIP := r.Header.Get("X-Real-IP")
+	if realIP != "" {
+		return realIP
+	}
+
+	// Fallback на RemoteAddr (прямое соединение)
+	addr := r.RemoteAddr
+	if idx := strings.LastIndex(addr, ":"); idx != -1 {
+		return addr[:idx]
+	}
+	return addr
 }

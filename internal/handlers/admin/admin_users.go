@@ -115,8 +115,9 @@ func (h *AdminUsersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Reques
 
 		// Обновление пароля (если указан)
 		if password != "" {
-			if len(password) < 8 {
-				http.Error(w, "Пароль должен содержать минимум 8 символов", http.StatusBadRequest)
+			// Валидация пароля (длина, сложность)
+			if err := validatePassword(password); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
@@ -142,8 +143,9 @@ func (h *AdminUsersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if len(password) < 8 {
-		http.Error(w, "Пароль должен содержать минимум 8 символов", http.StatusBadRequest)
+	// Валидация пароля (длина, сложность)
+	if err := validatePassword(password); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
