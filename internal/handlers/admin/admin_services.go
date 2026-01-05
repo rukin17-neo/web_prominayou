@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"prommsc/internal/handlers"
 	"prommsc/internal/handlers/shared"
 	"prommsc/models"
 	"strconv"
@@ -26,10 +27,12 @@ func (h *AdminServicesHandler) CreateServiceForm(w http.ResponseWriter, r *http.
 		return
 	}
 
-	shared.RenderTemplate(w, "admin/create_service.html", struct {
-		Title string
+	shared.RenderTemplate(w, r, "admin/create_service.html", struct {
+		Title       string
+		CurrentUser *models.User
 	}{
-		Title: "Добавление новой услуги",
+		Title:       "Добавление новой услуги",
+		CurrentUser: handlers.GetCurrentUser(r),
 	})
 }
 
@@ -53,19 +56,21 @@ func (h *AdminServicesHandler) UpdateServiceForm(w http.ResponseWriter, r *http.
 		return
 	}
 
-	shared.RenderTemplate(w, "admin/edit_service.html", struct {
-		Title   string
-		Service *models.Service
+	shared.RenderTemplate(w, r, "admin/edit_service.html", struct {
+		Title       string
+		Service     *models.Service
+		CurrentUser *models.User
 	}{
-		Title:   "Редактирование услуги",
-		Service: service,
+		Title:       "Редактирование услуги",
+		Service:     service,
+		CurrentUser: handlers.GetCurrentUser(r),
 	})
 }
 
 func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Request) {
 	services, err := h.repo.GetAll()
 	if err != nil {
-		http.Error(w, "Ошибка загрузки услуг: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "GetAllServices", err, ErrMsgLoadFailed, http.StatusInternalServerError)
 		return
 	}
 
@@ -84,14 +89,16 @@ func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	shared.RenderTemplate(w, "admin/services.html", struct {
+	shared.RenderTemplate(w, r, "admin/services.html", struct {
 		Title       string
 		Services    []models.Service
 		EditService *models.Service
+		CurrentUser *models.User
 	}{
 		Title:       "Управление услугами",
 		Services:    services,
 		EditService: editService,
+		CurrentUser: handlers.GetCurrentUser(r),
 	})
 }
 
@@ -133,7 +140,7 @@ func (h *AdminServicesHandler) CreateService(w http.ResponseWriter, r *http.Requ
 		}
 
 		if err := h.repo.Update(&service); err != nil {
-			http.Error(w, "Ошибка обновления: "+err.Error(), http.StatusInternalServerError)
+			logAndRespondWithError(w, "UpdateService", err, ErrMsgUpdateFailed, http.StatusInternalServerError)
 			return
 		}
 
@@ -162,7 +169,7 @@ func (h *AdminServicesHandler) CreateService(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := h.repo.Create(&service); err != nil {
-		http.Error(w, "Ошибка создания услуги: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "CreateService", err, ErrMsgCreateFailed, http.StatusInternalServerError)
 		return
 	}
 
@@ -197,7 +204,7 @@ func (h *AdminServicesHandler) UpdateService(w http.ResponseWriter, r *http.Requ
 			Title:   "Редактирование услуги",
 			Service: *service,
 		}
-		shared.RenderTemplate(w, "admin/edit_service.html", data)
+		shared.RenderTemplate(w, r, "admin/edit_service.html", data)
 		return
 	}
 
@@ -255,7 +262,7 @@ func (h *AdminServicesHandler) DeleteService(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := h.repo.Delete(id); err != nil {
-		http.Error(w, "Ошибка удаления: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "DeleteService", err, ErrMsgDeleteFailed, http.StatusInternalServerError)
 		return
 	}
 

@@ -50,3 +50,7 @@ database_*.sql
 # Go build artifacts
 *.go~
 *.tmp
+
+# Security reports
+report.md
+report_2.md

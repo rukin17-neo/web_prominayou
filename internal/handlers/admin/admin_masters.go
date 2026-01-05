@@ -1,9 +1,12 @@
 package admin
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
+	"prommsc/internal/handlers"
 	"prommsc/internal/handlers/shared"
 	"prommsc/models"
 	"strconv"
@@ -18,10 +21,86 @@ func NewAdminMastersHandler(repo *models.MastersRepository) *AdminMastersHandler
 	return &AdminMastersHandler{repo: repo}
 }
 
+// Допустимые расширения и MIME типы для загружаемых изображений
+var (
+	allowedExtensions = map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+		".webp": true,
+		".gif":  true,
+	}
+
+	allowedMimeTypes = map[string]string{
+		"image/jpeg": "image/jpeg",
+		"image/png":  "image/png",
+		"image/webp": "image/webp",
+		"image/gif":  "image/gif",
+	}
+)
+
+// validateImageFile проверяет, что загруженный файл является валидным изображением
+func validateImageFile(filename string, data []byte) (string, error) {
+	// 1. Проверка расширения файла
+	ext := strings.ToLower(filepath.Ext(filename))
+	if !allowedExtensions[ext] {
+		return "", fmt.Errorf("недопустимое расширение файла: %s. Разрешены только: .jpg, .jpeg, .png, .webp, .gif", ext)
+	}
+
+	// 2. Проверка реального содержимого файла по magic bytes
+	// http.DetectContentType анализирует первые 512 байт для определения типа
+	detectedType := http.DetectContentType(data)
+
+	// 3. Проверка, что детектированный тип находится в белом списке
+	mimeType, ok := allowedMimeTypes[detectedType]
+	if !ok {
+		return "", fmt.Errorf("недопустимый тип файла: %s. Файл не является изображением", detectedType)
+	}
+
+	// 4. Дополнительная проверка magic bytes для основных форматов
+	if err := verifyImageMagicBytes(data, mimeType); err != nil {
+		return "", err
+	}
+
+	return mimeType, nil
+}
+
+// verifyImageMagicBytes проверяет magic bytes (сигнатуры) файлов изображений
+func verifyImageMagicBytes(data []byte, expectedType string) error {
+	if len(data) < 12 {
+		return fmt.Errorf("файл слишком маленький для проверки")
+	}
+
+	switch expectedType {
+	case "image/jpeg":
+		// JPEG начинается с FF D8 FF
+		if !bytes.HasPrefix(data, []byte{0xFF, 0xD8, 0xFF}) {
+			return fmt.Errorf("файл не является валидным JPEG изображением")
+		}
+	case "image/png":
+		// PNG начинается с 89 50 4E 47 0D 0A 1A 0A
+		if !bytes.HasPrefix(data, []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}) {
+			return fmt.Errorf("файл не является валидным PNG изображением")
+		}
+	case "image/gif":
+		// GIF начинается с GIF87a или GIF89a
+		if !bytes.HasPrefix(data, []byte("GIF87a")) && !bytes.HasPrefix(data, []byte("GIF89a")) {
+			return fmt.Errorf("файл не является валидным GIF изображением")
+		}
+	case "image/webp":
+		// WebP: байты 0-3 = "RIFF", байты 8-11 = "WEBP"
+		if len(data) < 12 || !bytes.HasPrefix(data, []byte("RIFF")) || !bytes.Equal(data[8:12], []byte("WEBP")) {
+			return fmt.Errorf("файл не является валидным WebP изображением")
+		}
+	}
+
+	return nil
+}
+
 func (h *AdminMastersHandler) List(w http.ResponseWriter, r *http.Request) {
 	masters, err := h.repo.GetAll()
 	if err != nil {
-		http.Error(w, "Ошибка загрузки мастеров: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "GetAllMasters", err, ErrMsgLoadFailed, http.StatusInternalServerError)
 		return
 	}
 
@@ -36,14 +115,16 @@ func (h *AdminMastersHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type pageData struct {
-		Title      string
-		Masters    []models.Master
-		EditMaster *models.Master
+		Title       string
+		Masters     []models.Master
+		EditMaster  *models.Master
+		CurrentUser *models.User
 	}
-	shared.RenderTemplate(w, "admin/masters.html", pageData{
-		Title:      "Мастера",
-		Masters:    masters,
-		EditMaster: editMaster,
+	shared.RenderTemplate(w, r, "admin/masters.html", pageData{
+		Title:       "Мастера",
+		Masters:     masters,
+		EditMaster:  editMaster,
+		CurrentUser: handlers.GetCurrentUser(r),
 	})
 }
 
@@ -74,36 +155,23 @@ func (h *AdminMastersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		// определяем MIME тип
-		photoType = header.Header.Get("Content-Type")
-		if photoType == "" {
-			// определяем тип по расширению
-			ext := strings.ToLower(header.Filename)
-			switch {
-			case strings.HasSuffix(ext, ".jpg"), strings.HasSuffix(ext, ".jpeg"):
-				photoType = "image/jpeg"
-			case strings.HasSuffix(ext, ".png"):
-				photoType = "image/png"
-			case strings.HasSuffix(ext, ".webp"):
-				photoType = "image/webp"
-			case strings.HasSuffix(ext, ".gif"):
-				photoType = "image/gif"
-			default:
-				photoType = "image/jpeg"
-			}
-		}
-
 		// валидация размера файла (максимум 5MB)
 		if len(photoData) > 5*1024*1024 {
 			http.Error(w, "Файл слишком большой. Максимальный размер: 5MB", http.StatusBadRequest)
 			return
 		}
 
-		// валидация типа файла
-		if !strings.HasPrefix(photoType, "image/") {
-			http.Error(w, "Поддерживаются только изображения", http.StatusBadRequest)
+		// безопасная валидация файла:
+		// - проверка расширения из белого списка
+		// - проверка реального содержимого по magic bytes
+		// - защита от подделки Content-Type заголовка
+		validatedType, err := validateImageFile(header.Filename, photoData)
+		if err != nil {
+			http.Error(w, "Ошибка валидации файла: "+err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		photoType = validatedType
 
 		// генерируем временный url для отображения (будет обновлен после создания)
 		photoURL = "/admin/masters/photo/temp"
@@ -140,7 +208,7 @@ func (h *AdminMastersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Requ
 		}
 
 		if err := h.repo.Update(&m); err != nil {
-			http.Error(w, "Ошибка обновления: "+err.Error(), http.StatusInternalServerError)
+			logAndRespondWithError(w, "UpdateMaster", err, ErrMsgUpdateFailed, http.StatusInternalServerError)
 			return
 		}
 	} else {
@@ -158,7 +226,7 @@ func (h *AdminMastersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Requ
 		}
 
 		if err := h.repo.Create(&m); err != nil {
-			http.Error(w, "Ошибка создания: "+err.Error(), http.StatusInternalServerError)
+			logAndRespondWithError(w, "CreateMaster", err, ErrMsgCreateFailed, http.StatusInternalServerError)
 			return
 		}
 
@@ -218,7 +286,7 @@ func (h *AdminMastersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.repo.Delete(id); err != nil {
-		http.Error(w, "Ошибка удаления: "+err.Error(), http.StatusInternalServerError)
+		logAndRespondWithError(w, "DeleteMaster", err, ErrMsgDeleteFailed, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/admin/masters", http.StatusSeeOther)

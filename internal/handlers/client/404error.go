@@ -8,7 +8,7 @@ import (
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	shared.RenderTemplate(w, "404.html", models.PageData{
+	shared.RenderTemplate(w, r, "404.html", models.PageData{
 		Title: "Страница не найдена",
 	})
 }

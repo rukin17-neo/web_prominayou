@@ -33,7 +33,7 @@ func (h *MastersHandler) List(w http.ResponseWriter, r *http.Request) {
 		PageData: models.PageData{Title: "Наши мастера", Content: "Наша команда профессионалов."},
 		Masters:  masters,
 	}
-	shared.RenderTemplate(w, "masters.html", data)
+	shared.RenderTemplate(w, r, "masters.html", data)
 }
 
 // фото из бд

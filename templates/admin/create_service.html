@@ -3,6 +3,7 @@
     <h2>{{ .Title }}</h2>
     
     <form action="/admin/services" method="POST" class="admin-form">
+        {{ .CSRFField }}
         <div class="form-group">
             <label for="name">Название услуги</label>
             <input type="text" id="name" name="name" required class="form-control">

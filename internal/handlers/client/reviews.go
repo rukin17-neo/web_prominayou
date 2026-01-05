@@ -22,5 +22,5 @@ func ReviewsHandler(w http.ResponseWriter, r *http.Request) {
 		Reviews: reviews,
 	}
 
-	shared.RenderTemplate(w, "reviews.html", data)
+	shared.RenderTemplate(w, r, "reviews.html", data)
 }

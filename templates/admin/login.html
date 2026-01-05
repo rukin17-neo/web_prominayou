@@ -1,0 +1,39 @@
+{{ define "content" }}
+<div class="admin-container" style="max-width: 400px; margin: 100px auto;">
+    <h2 style="text-align: center; color: var(--light-gold); margin-bottom: 30px;">Вход в панель администратора</h2>
+
+    {{ if .Error }}
+    <div class="error-message" style="background: #f44336; color: white; padding: 12px; border-radius: 4px; margin-bottom: 20px; text-align: center;">
+        {{ .Error }}
+    </div>
+    {{ end }}
+
+    {{ if .Success }}
+    <div class="success-message" style="background: #4CAF50; color: white; padding: 12px; border-radius: 4px; margin-bottom: 20px; text-align: center;">
+        {{ .Success }}
+    </div>
+    {{ end }}
+
+    <form action="/admin/login" method="POST" class="admin-form" style="padding: 30px;">
+        {{ .CSRFField }}
+        <div class="form-group">
+            <label for="username">Имя пользователя:</label>
+            <input type="text" id="username" name="username" required autofocus class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required class="form-control">
+        </div>
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label style="font-weight: normal; color: #f0f0f0; display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" name="remember_me" value="1" style="width: auto; margin-right: 8px; cursor: pointer;">
+                Запомнить меня (30 дней)
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Войти</button>
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="/admin/forgot-password" style="color: #2196F3; text-decoration: none;">Забыли пароль?</a>
+        </div>
+    </form>
+</div>
+{{ end }}

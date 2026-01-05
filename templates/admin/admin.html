@@ -1,19 +1,48 @@
 {{ define "content" }}
-<div class="admin-container">
-    <h2>{{ .Title }}</h2>
-    <p class="admin-description">{{ .Content }}</p>
-    
-    <div class="admin-dashboard">
-        <div class="dashboard-card">
-            <h3>Управление мастерами</h3>
-            <p>Добавляйте, редактируйте и удаляйте мастеров, загружайте их фотографии</p>
-            <a href="/admin/masters" class="btn btn-primary btn-lg">Мастера</a>
+<div class="admin-layout" style="display: flex; min-height: 500px;">
+    <aside class="admin-sidebar" style="width: 200px; background: #2a2a2a; padding: 20px; border-radius: 4px; margin-right: 20px;">
+        <nav style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="/admin" style="color: #f0f0f0; text-decoration: none; padding: 10px; background: var(--light-gold); border-radius: 4px;">Главная</a>
+            <a href="/admin/services" style="color: #f0f0f0; text-decoration: none; padding: 10px; hover: background: #3a3a3a; border-radius: 4px;">Услуги</a>
+            <a href="/admin/masters" style="color: #f0f0f0; text-decoration: none; padding: 10px; hover: background: #3a3a3a; border-radius: 4px;">Мастера</a>
+            <a href="/admin/users" style="color: #f0f0f0; text-decoration: none; padding: 10px; hover: background: #3a3a3a; border-radius: 4px;">Пользователи</a>
+        </nav>
+    </aside>
+    <div class="admin-content" style="flex: 1;">
+        {{ if .CurrentUser }}
+        <div class="admin-header" style="background: #2a2a2a; padding: 15px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;">
+            <div style="color: #f0f0f0;">
+                Вы вошли как: <strong style="color: var(--light-gold);">{{ .CurrentUser.Username }}</strong>
+            </div>
+            <form action="/admin/logout" method="POST" style="margin: 0;">
+                {{ .CSRFField }}
+                <button type="submit" class="btn btn-secondary" style="padding: 8px 16px;">Выйти</button>
+            </form>
         </div>
-        
-        <div class="dashboard-card">
-            <h3>Управление услугами</h3>
-            <p>Создавайте, редактируйте и удаляйте услуги, устанавливайте цены и длительность</p>
-            <a href="/admin/services" class="btn btn-primary btn-lg">Услуги</a>
+        {{ end }}
+        <div class="admin-container">
+            <h2>{{ .Title }}</h2>
+            <p class="admin-description">{{ .Content }}</p>
+
+            <div class="admin-dashboard">
+                <div class="dashboard-card">
+                    <h3>Управление мастерами</h3>
+                    <p>Добавляйте, редактируйте и удаляйте мастеров, загружайте их фотографии</p>
+                    <a href="/admin/masters" class="btn btn-primary btn-lg">Мастера</a>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Управление услугами</h3>
+                    <p>Создавайте, редактируйте и удаляйте услуги, устанавливайте цены и длительность</p>
+                    <a href="/admin/services" class="btn btn-primary btn-lg">Услуги</a>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>Управление пользователями</h3>
+                    <p>Создавайте, редактируйте и удаляйте пользователей системы</p>
+                    <a href="/admin/users" class="btn btn-primary btn-lg">Пользователи</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

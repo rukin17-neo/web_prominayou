@@ -11,5 +11,5 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		Title:   "ProminaYou - Главная",
 		Content: "Добро пожаловать на наш сайт!",
 	}
-	shared.RenderTemplate(w, "index.html", data)
+	shared.RenderTemplate(w, r, "index.html", data)
 }
