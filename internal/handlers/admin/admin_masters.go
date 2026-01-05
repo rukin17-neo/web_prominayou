@@ -241,38 +241,7 @@ func (h *AdminMastersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *AdminMastersHandler) GetPhoto(w http.ResponseWriter, r *http.Request) {
-	// извлекаем id из url
-	pathParts := strings.Split(r.URL.Path, "/")
-	if len(pathParts) < 4 {
-		http.Error(w, "Неверный URL", http.StatusBadRequest)
-		return
-	}
-
-	idStr := pathParts[3]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		http.Error(w, "Неверный ID", http.StatusBadRequest)
-		return
-	}
-
-	master, err := h.repo.GetByID(id)
-	if err != nil {
-		http.Error(w, "Мастер не найден", http.StatusNotFound)
-		return
-	}
-
-	if len(master.PhotoData) == 0 {
-		http.Error(w, "Фотография не найдена", http.StatusNotFound)
-		return
-	}
-
-	// устанавливаем заголовки для изображения
-	w.Header().Set("Content-Type", master.PhotoType)
-	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(master.PhotoData)))
-	w.Header().Set("Cache-Control", "public, max-age=31536000") // Кэширование на 1 год
-
-	// отправляем данные изображения
-	w.Write(master.PhotoData)
+	shared.ServePhoto(h.repo)(w, r)
 }
 
 func (h *AdminMastersHandler) Delete(w http.ResponseWriter, r *http.Request) {
