@@ -1,0 +1,82 @@
+{{ define "pagination" }}
+{{ with .Pagination }}
+{{ if gt .TotalPages 1 }}
+<div class="pagination-container">
+    <div class="pagination-info">
+        Страница {{ .Page }} из {{ .TotalPages }}
+        <span class="pagination-total">(Всего записей: {{ .Total }})</span>
+    </div>
+
+    <nav class="pagination">
+        {{ if .HasPrevious }}
+        <a href="?page={{ sub .Page 1 }}&limit={{ .Limit }}" class="pagination-btn pagination-prev">
+            ← Предыдущая
+        </a>
+        {{ else }}
+        <span class="pagination-btn pagination-prev pagination-disabled">
+            ← Предыдущая
+        </span>
+        {{ end }}
+
+        <div class="pagination-pages">
+            {{ $currentPage := .Page }}
+            {{ $totalPages := .TotalPages }}
+            {{ $limit := .Limit }}
+
+            {{ if le $totalPages 7 }}
+                {{ range $i := seq 1 $totalPages }}
+                    {{ if eq $i $currentPage }}
+                        <span class="pagination-page pagination-current">{{ $i }}</span>
+                    {{ else }}
+                        <a href="?page={{ $i }}&limit={{ $limit }}" class="pagination-page">{{ $i }}</a>
+                    {{ end }}
+                {{ end }}
+            {{ else }}
+                {{ if eq $currentPage 1 }}
+                    <span class="pagination-page pagination-current">1</span>
+                {{ else }}
+                    <a href="?page=1&limit={{ $limit }}" class="pagination-page">1</a>
+                {{ end }}
+
+                {{ if gt $currentPage 3 }}
+                    <span class="pagination-ellipsis">...</span>
+                {{ end }}
+
+                {{ if and (gt $currentPage 2) (lt $currentPage (sub $totalPages 1)) }}
+                    <a href="?page={{ sub $currentPage 1 }}&limit={{ $limit }}" class="pagination-page">{{ sub $currentPage 1 }}</a>
+                    <span class="pagination-page pagination-current">{{ $currentPage }}</span>
+                    <a href="?page={{ add $currentPage 1 }}&limit={{ $limit }}" class="pagination-page">{{ add $currentPage 1 }}</a>
+                {{ else if eq $currentPage 2 }}
+                    <span class="pagination-page pagination-current">2</span>
+                    <a href="?page=3&limit={{ $limit }}" class="pagination-page">3</a>
+                {{ else if eq $currentPage (sub $totalPages 1) }}
+                    <a href="?page={{ sub $totalPages 2 }}&limit={{ $limit }}" class="pagination-page">{{ sub $totalPages 2 }}</a>
+                    <span class="pagination-page pagination-current">{{ sub $totalPages 1 }}</span>
+                {{ end }}
+
+                {{ if lt $currentPage (sub $totalPages 2) }}
+                    <span class="pagination-ellipsis">...</span>
+                {{ end }}
+
+                {{ if eq $currentPage $totalPages }}
+                    <span class="pagination-page pagination-current">{{ $totalPages }}</span>
+                {{ else }}
+                    <a href="?page={{ $totalPages }}&limit={{ $limit }}" class="pagination-page">{{ $totalPages }}</a>
+                {{ end }}
+            {{ end }}
+        </div>
+
+        {{ if .HasNext }}
+        <a href="?page={{ add .Page 1 }}&limit={{ .Limit }}" class="pagination-btn pagination-next">
+            Следующая →
+        </a>
+        {{ else }}
+        <span class="pagination-btn pagination-next pagination-disabled">
+            Следующая →
+        </span>
+        {{ end }}
+    </nav>
+</div>
+{{ end }}
+{{ end }}
+{{ end }}

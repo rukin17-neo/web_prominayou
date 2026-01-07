@@ -1,6 +1,7 @@
 package client
 
 import (
+	"log"
 	"net/http"
 	"prommsc/internal/handlers/shared"
 	"prommsc/models"
@@ -8,7 +9,8 @@ import (
 
 type MastersPageData struct {
 	models.PageData
-	Masters []models.Master
+	Masters    []models.Master
+	Pagination models.PaginationResult
 }
 
 type MastersHandler struct {
@@ -20,15 +22,21 @@ func NewMastersHandler(repo *models.MastersRepository) *MastersHandler {
 }
 
 func (h *MastersHandler) List(w http.ResponseWriter, r *http.Request) {
-	masters, err := h.repo.GetAll()
+	// Получение параметров пагинации из запроса
+	paginationParams := models.NewPaginationParams(r)
+
+	// Получение мастеров с пагинацией
+	masters, pagination, err := h.repo.GetAllWithPagination(paginationParams)
 	if err != nil {
+		log.Printf("Ошибка загрузки мастеров: %v", err)
 		http.Error(w, "Ошибка загрузки мастеров", http.StatusInternalServerError)
 		return
 	}
 
 	data := MastersPageData{
-		PageData: models.PageData{Title: "Наши мастера", Content: "Наша команда профессионалов."},
-		Masters:  masters,
+		PageData:   models.PageData{Title: "Наши мастера", Content: "Наша команда профессионалов."},
+		Masters:    masters,
+		Pagination: pagination,
 	}
 	shared.RenderTemplate(w, r, "masters.html", data)
 }

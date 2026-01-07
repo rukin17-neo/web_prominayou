@@ -2,6 +2,7 @@ package admin
 
 import (
 	"bytes"
+	"database/sql"
 	"fmt"
 	"io"
 	"net/http"
@@ -98,7 +99,11 @@ func verifyImageMagicBytes(data []byte, expectedType string) error {
 }
 
 func (h *AdminMastersHandler) List(w http.ResponseWriter, r *http.Request) {
-	masters, err := h.repo.GetAll()
+	// Получение параметров пагинации из запроса
+	paginationParams := models.NewPaginationParams(r)
+
+	// Получение мастеров с пагинацией
+	masters, pagination, err := h.repo.GetAllWithPagination(paginationParams)
 	if err != nil {
 		logAndRespondWithError(w, "GetAllMasters", err, ErrMsgLoadFailed, http.StatusInternalServerError)
 		return
@@ -119,12 +124,14 @@ func (h *AdminMastersHandler) List(w http.ResponseWriter, r *http.Request) {
 		Masters     []models.Master
 		EditMaster  *models.Master
 		CurrentUser *models.User
+		Pagination  models.PaginationResult
 	}
 	shared.RenderTemplate(w, r, "admin/masters.html", pageData{
 		Title:       "Мастера",
 		Masters:     masters,
 		EditMaster:  editMaster,
 		CurrentUser: handlers.GetCurrentUser(r),
+		Pagination:  pagination,
 	})
 }
 
@@ -194,17 +201,17 @@ func (h *AdminMastersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Requ
 		if len(photoData) == 0 {
 			// сохраняем существующие данные
 			photoData = existing.PhotoData
-			photoType = existing.PhotoType
-			photoURL = existing.PhotoURL
+			photoType = existing.PhotoType.String
+			photoURL = existing.PhotoURL.String
 		}
 
 		m := models.Master{
 			ID:        id,
 			FirstName: firstName,
 			LastName:  lastName,
-			PhotoURL:  photoURL,
+			PhotoURL:  sql.NullString{String: photoURL, Valid: photoURL != ""},
 			PhotoData: photoData,
-			PhotoType: photoType,
+			PhotoType: sql.NullString{String: photoType, Valid: photoType != ""},
 		}
 
 		if err := h.repo.Update(&m); err != nil {
@@ -220,9 +227,9 @@ func (h *AdminMastersHandler) CreateOrUpdate(w http.ResponseWriter, r *http.Requ
 		m := models.Master{
 			FirstName: firstName,
 			LastName:  lastName,
-			PhotoURL:  "/admin/masters/photo/temp",
+			PhotoURL:  sql.NullString{String: "/admin/masters/photo/temp", Valid: true},
 			PhotoData: photoData,
-			PhotoType: photoType,
+			PhotoType: sql.NullString{String: photoType, Valid: true},
 		}
 
 		if err := h.repo.Create(&m); err != nil {

@@ -37,7 +37,11 @@ func ServePhoto(repo *models.MastersRepository) http.HandlerFunc {
 		}
 
 		// устанавливаем заголовки для изображения
-		w.Header().Set("Content-Type", master.PhotoType)
+		contentType := "image/jpeg" // значение по умолчанию
+		if master.PhotoType.Valid {
+			contentType = master.PhotoType.String
+		}
+		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(master.PhotoData)))
 		w.Header().Set("Cache-Control", "public, max-age=31536000") // кэширование на 1 год
 

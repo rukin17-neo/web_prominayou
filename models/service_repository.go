@@ -10,12 +10,44 @@ func NewServiceRepository(db *sqlx.DB) *ServiceRepository {
 	return &ServiceRepository{db: db}
 }
 
-// Для клиентов сайта
+// GetAll возвращает все услуги без пагинации (для обратной совместимости)
 func (r *ServiceRepository) GetAll() ([]Service, error) {
 	var services []Service
 	query := `SELECT id, name, price, duration FROM services ORDER BY id`
 	err := r.db.Select(&services, query)
 	return services, err
+}
+
+// GetAllWithPagination возвращает услуги с пагинацией
+func (r *ServiceRepository) GetAllWithPagination(params PaginationParams) ([]Service, PaginationResult, error) {
+	var services []Service
+
+	// Получение общего количества услуг
+	total, err := r.Count()
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	// Запрос с пагинацией
+	query := `SELECT id, name, price, duration
+	          FROM services
+	          ORDER BY id
+	          LIMIT $1 OFFSET $2`
+	err = r.db.Select(&services, query, params.Limit, params.GetOffset())
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	pagination := NewPaginationResult(total, params)
+	return services, pagination, nil
+}
+
+// Count возвращает общее количество услуг
+func (r *ServiceRepository) Count() (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM services`
+	err := r.db.Get(&count, query)
+	return count, err
 }
 
 // Админка

@@ -5,11 +5,12 @@
     <div class="masters-grid">
         {{ range .Masters }}
         <div class="master-card">
-            <img src="{{ .PhotoURL }}" alt="{{ .FirstName }} {{ .LastName }}" class="master-photo">
+            <img src="{{ .PhotoURL.String }}" alt="{{ .FirstName }} {{ .LastName }}" class="master-photo">
             <div class="master-name">{{ .FirstName }} {{ .LastName }}</div>
         </div>
         {{ end }}
     </div>
+    {{ template "pagination" . }}
 </section>
 {{ end }}
 

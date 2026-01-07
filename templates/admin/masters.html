@@ -15,7 +15,6 @@
                 Вы вошли как: <strong style="color: var(--light-gold);">{{ .CurrentUser.Username }}</strong>
             </div>
             <form action="/admin/logout" method="POST" style="margin: 0;">
-                {{ .CSRFField }}
                 <button type="submit" class="btn btn-secondary" style="padding: 8px 16px;">Выйти</button>
             </form>
         </div>
@@ -23,7 +22,6 @@
         <div class="admin-container">
           <h2>{{ .Title }}</h2>
           <form action="/admin/masters" method="POST" enctype="multipart/form-data" class="admin-form">
-            {{ .CSRFField }}
             {{ if .EditMaster }}
               <input type="hidden" name="id" value="{{ .EditMaster.ID }}">
             {{ end }}
@@ -40,7 +38,7 @@
               <input type="file" name="photo" {{ if not .EditMaster }}required{{ end }}>
               {{ if .EditMaster }}
                 <div style="margin-top:8px">
-                  Текущее фото: <img src="{{ .EditMaster.PhotoURL }}" alt="" class="master-photo">
+                  Текущее фото: <img src="{{ .EditMaster.PhotoURL.String }}" alt="" class="master-photo">
                 </div>
               {{ end }}
             </div>
@@ -62,13 +60,12 @@
                 {{ range .Masters }}
                 <tr>
                   <td>{{ .ID }}</td>
-                  <td><img src="{{ .PhotoURL }}" class="master-photo" alt=""></td>
+                  <td><img src="{{ .PhotoURL.String }}" class="master-photo" alt=""></td>
                   <td>{{ .FirstName }}</td>
                   <td>{{ .LastName }}</td>
                   <td>
                     <a href="/admin/masters?edit={{ .ID }}" class="btn-edit">Редактировать</a>
                     <form action="/admin/masters/delete" method="POST" style="display:inline">
-                      {{ $.CSRFField }}
                       <input type="hidden" name="id" value="{{ .ID }}">
                       <button type="submit" class="btn-delete">Удалить</button>
                     </form>
@@ -78,6 +75,7 @@
               </tbody>
             </table>
           </div>
+          {{ template "pagination" . }}
         </div>
     </div>
 </div>

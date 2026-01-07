@@ -68,7 +68,11 @@ func (h *AdminServicesHandler) UpdateServiceForm(w http.ResponseWriter, r *http.
 }
 
 func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Request) {
-	services, err := h.repo.GetAll()
+	// Получение параметров пагинации из запроса
+	paginationParams := models.NewPaginationParams(r)
+
+	// Получение услуг с пагинацией
+	services, pagination, err := h.repo.GetAllWithPagination(paginationParams)
 	if err != nil {
 		logAndRespondWithError(w, "GetAllServices", err, ErrMsgLoadFailed, http.StatusInternalServerError)
 		return
@@ -76,7 +80,14 @@ func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Reque
 
 	if r.Header.Get("Accept") == "application/json" {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(services)
+		response := struct {
+			Services   []models.Service         `json:"services"`
+			Pagination models.PaginationResult `json:"pagination"`
+		}{
+			Services:   services,
+			Pagination: pagination,
+		}
+		json.NewEncoder(w).Encode(response)
 		return
 	}
 
@@ -94,11 +105,13 @@ func (h *AdminServicesHandler) ListServices(w http.ResponseWriter, r *http.Reque
 		Services    []models.Service
 		EditService *models.Service
 		CurrentUser *models.User
+		Pagination  models.PaginationResult
 	}{
 		Title:       "Управление услугами",
 		Services:    services,
 		EditService: editService,
 		CurrentUser: handlers.GetCurrentUser(r),
+		Pagination:  pagination,
 	})
 }
 
@@ -249,13 +262,9 @@ func (h *AdminServicesHandler) UpdateService(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *AdminServicesHandler) DeleteService(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Ошибка парсинга формы", http.StatusBadRequest)
-		return
-	}
-	log.Printf("DeleteService: method=%s, form_id=%q, query_id=%q, path_id=%q", r.Method, r.Form.Get("id"), r.URL.Query().Get("id"), mux.Vars(r)["id"])
-
-	id, err := strconv.Atoi(r.FormValue("id"))
+	// Получаем ID из URL параметров
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, "Неверный ID", http.StatusBadRequest)
 		return

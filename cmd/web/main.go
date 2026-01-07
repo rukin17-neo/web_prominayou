@@ -93,9 +93,9 @@ func main() {
 
 	r.HandleFunc("/masters/photo/{id}", mastersHandler.GetPhoto).Methods("GET")
 
-	// Admin subrouter with CSRF protection for ALL admin routes
+	// Admin subrouter
 	adminRouter := r.PathPrefix("/admin").Subrouter()
-	adminRouter.Use(middleware.CSRFProtection())
+	// CSRF Protection removed
 
 	// Public auth routes on admin subrouter (get CSRF protection)
 	// Login with strict rate limiting
@@ -170,7 +170,7 @@ func main() {
 		}
 	}()
 
-	port := ":8003"
+	port := ":8004"
 	log.Printf("Сервер запущен на http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, r))
 }

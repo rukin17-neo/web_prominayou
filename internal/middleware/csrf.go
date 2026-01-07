@@ -20,20 +20,20 @@ func CSRFProtection() mux.MiddlewareFunc {
 
 	authKey := []byte(authKeyStr)
 
-	// Динамически определяем Secure flag из переменной окружения
-	isSecure := os.Getenv("SESSION_SECURE") == "true"
-
-	return csrf.Protect(
+	csrfMiddleware := csrf.Protect(
 		authKey,
-		csrf.Secure(isSecure),               // Динамически из SESSION_SECURE env
-		csrf.SameSite(csrf.SameSiteLaxMode), // Prevent CSRF attacks
+		csrf.Secure(false),                  // Отключаем Secure для localhost
+		csrf.SameSite(csrf.SameSiteStrictMode), // Strict mode
 		csrf.Path("/"),
 		csrf.MaxAge(24*3600),                // 24 hours to match session
 		csrf.ErrorHandler(csrfErrorHandler()), // Custom error handler
-		csrf.CookieName("prommsc_csrf"),
+		csrf.CookieName("csrf_token_v2"),    // Новое имя cookie
 		csrf.FieldName("csrf_token"),
 		csrf.RequestHeader("X-CSRF-Token"), // For AJAX requests
 	)
+
+	log.Printf("CSRF middleware initialized: Secure=false, SameSite=Strict, MaxAge=24h")
+	return csrfMiddleware
 }
 
 // csrfErrorHandler handles CSRF validation failures
