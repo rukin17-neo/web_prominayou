@@ -88,8 +88,9 @@ func main() {
 
 	r := mux.NewRouter()
 
-	// Применяем security headers ко всем маршрутам
+	// Применяем middleware ко всем маршрутам
 	r.Use(middleware.SecurityHeaders())
+	r.Use(middleware.MetricsMiddleware())
 
 	r.HandleFunc("/", clientHandlers.HomeHandler).Methods("GET")
 	r.HandleFunc("/services", servicesHandler.GetAllServices).Methods("GET")
@@ -162,6 +163,11 @@ func main() {
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),
 	)
+
+	// Мониторинг и метрики
+	r.HandleFunc("/health", handlers.HealthCheckHandler(db.DB)).Methods("GET")
+	r.HandleFunc("/metrics", handlers.MetricsHandler).Methods("GET")
+	r.HandleFunc("/metrics/prometheus", handlers.PrometheusMetricsHandler).Methods("GET")
 
 	// Профилирование (pprof endpoints)
 	// Доступно по адресу /debug/pprof/

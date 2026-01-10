@@ -1,0 +1,35 @@
+# Пример конфигурации Prometheus для ProminaYou
+
+global:
+  scrape_interval: 15s           # Интервал сбора метрик
+  evaluation_interval: 15s       # Интервал оценки правил алертов
+  external_labels:
+    cluster: 'prommsc-prod'
+    replica: 'A'
+
+# Правила алертов
+rule_files:
+  - 'alerts.yml'
+
+# Конфигурация scrape
+scrape_configs:
+  # ProminaYou метрики
+  - job_name: 'prommsc'
+    static_configs:
+      - targets: ['localhost:8004']
+    metrics_path: '/metrics/prometheus'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Health check
+  - job_name: 'prommsc-health'
+    static_configs:
+      - targets: ['localhost:8004']
+    metrics_path: '/health'
+    scrape_interval: 30s
+
+# Опционально: настройка для AlertManager
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['localhost:9093']

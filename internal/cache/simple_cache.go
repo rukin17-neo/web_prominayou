@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"prommsc/internal/metrics"
 	"sync"
 	"time"
 )
@@ -55,16 +56,21 @@ func (c *SimpleCache) Get(key string) (interface{}, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
+	m := metrics.GetMetrics()
+
 	item, found := c.items[key]
 	if !found {
+		m.RecordCacheMiss()
 		return nil, false
 	}
 
 	// Проверяем истек ли элемент
 	if time.Now().After(item.Expiration) {
+		m.RecordCacheMiss()
 		return nil, false
 	}
 
+	m.RecordCacheHit()
 	return item.Value, true
 }
 
@@ -97,6 +103,8 @@ func (c *SimpleCache) cleanupExpired() {
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
+	m := metrics.GetMetrics()
+
 	for {
 		select {
 		case <-c.ctx.Done():
@@ -104,11 +112,18 @@ func (c *SimpleCache) cleanupExpired() {
 		case <-ticker.C:
 			c.mu.Lock()
 			now := time.Now()
+			evicted := 0
 			for key, item := range c.items {
 				if now.After(item.Expiration) {
 					delete(c.items, key)
+					evicted++
 				}
 			}
+			// Обновляем метрики
+			for i := 0; i < evicted; i++ {
+				m.RecordCacheEviction()
+			}
+			m.UpdateCacheStats(int64(len(c.items)))
 			c.mu.Unlock()
 		}
 	}

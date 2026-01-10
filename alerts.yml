@@ -1,0 +1,111 @@
+# Правила алертов для ProminaYou
+
+groups:
+  - name: prommsc_critical
+    interval: 30s
+    rules:
+      # Сервис недоступен
+      - alert: ServiceDown
+        expr: up{job="prommsc"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "ProminaYou сервис недоступен"
+          description: "Сервис не отвечает более 1 минуты"
+
+      # База данных недоступна
+      - alert: DatabaseDown
+        expr: prommsc_db_errors_total > 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Проблемы с подключением к БД"
+          description: "Более 10 ошибок БД за 2 минуты"
+
+      # Connection pool исчерпан
+      - alert: DBPoolExhaustion
+        expr: prommsc_db_connections_open >= 23
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Пул подключений к БД почти исчерпан"
+          description: "{{ $value }} из 25 подключений используются"
+
+  - name: prommsc_warnings
+    interval: 1m
+    rules:
+      # Высокий процент ошибок
+      - alert: HighErrorRate
+        expr: (sum(rate(prommsc_http_errors_total[5m])) / sum(rate(prommsc_http_requests_total[5m]))) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокий процент HTTP ошибок"
+          description: "Процент ошибок {{ $value | humanizePercentage }} (порог: 5%)"
+
+      # Медленные запросы
+      - alert: SlowResponseTime
+        expr: prommsc_http_request_duration_ms > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Медленное время ответа"
+          description: "Среднее время ответа {{ $value }}ms (порог: 1000ms)"
+
+      # Низкий cache hit rate
+      - alert: LowCacheHitRate
+        expr: prommsc_cache_hit_rate < 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Низкий процент попаданий в кэш"
+          description: "Cache hit rate {{ $value }}% (порог: 50%)"
+
+      # Высокое использование памяти
+      - alert: HighMemoryUsage
+        expr: prommsc_go_memory_alloc_bytes > 500 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование памяти"
+          description: "Память {{ $value | humanize }}B (порог: 500MB)"
+
+      # Много горутин
+      - alert: TooManyGoroutines
+        expr: prommsc_go_goroutines > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Слишком много горутин"
+          description: "Количество горутин: {{ $value }} (порог: 1000)"
+
+  - name: prommsc_performance
+    interval: 2m
+    rules:
+      # Медленные запросы к БД
+      - alert: SlowDatabaseQueries
+        expr: prommsc_db_query_duration_ms > 100
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Медленные запросы к БД"
+          description: "Средняя длительность запроса {{ $value }}ms (порог: 100ms)"
+
+      # Высокая нагрузка
+      - alert: HighLoad
+        expr: rate(prommsc_http_requests_total[1m]) > 1000
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Высокая нагрузка на сервис"
+          description: "{{ $value }} запросов в секунду"
