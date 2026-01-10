@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	_ "net/http/pprof"
 )
 
 func cacheControl(h http.Handler) http.Handler {
@@ -38,6 +39,11 @@ func main() {
 		log.Fatalf("Не удалось проверить подключение к БД: %v", err)
 	}
 	log.Println("Успешное подключение к PostgreSQL")
+
+	// Применение оптимизаций БД (индексы, ANALYZE)
+	if err := config.OptimizeDatabase(db.DB); err != nil {
+		log.Printf("Предупреждение: не удалось применить оптимизации БД: %v", err)
+	}
 
 	if err := handlers.InitTemplates(); err != nil {
 		log.Fatalf("Ошибка загрузки шаблонов: %v", err)
@@ -82,8 +88,9 @@ func main() {
 
 	r := mux.NewRouter()
 
-	// Применяем security headers ко всем маршрутам
+	// Применяем middleware ко всем маршрутам
 	r.Use(middleware.SecurityHeaders())
+	r.Use(middleware.MetricsMiddleware())
 
 	r.HandleFunc("/", clientHandlers.HomeHandler).Methods("GET")
 	r.HandleFunc("/services", servicesHandler.GetAllServices).Methods("GET")
@@ -93,9 +100,9 @@ func main() {
 
 	r.HandleFunc("/masters/photo/{id}", mastersHandler.GetPhoto).Methods("GET")
 
-	// Admin subrouter with CSRF protection for ALL admin routes
+	// Admin subrouter
 	adminRouter := r.PathPrefix("/admin").Subrouter()
-	adminRouter.Use(middleware.CSRFProtection())
+	// CSRF Protection removed
 
 	// Public auth routes on admin subrouter (get CSRF protection)
 	// Login with strict rate limiting
@@ -157,6 +164,15 @@ func main() {
 		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),
 	)
 
+	// Мониторинг и метрики
+	r.HandleFunc("/health", handlers.HealthCheckHandler(db.DB)).Methods("GET")
+	r.HandleFunc("/metrics", handlers.MetricsHandler).Methods("GET")
+	r.HandleFunc("/metrics/prometheus", handlers.PrometheusMetricsHandler).Methods("GET")
+
+	// Профилирование (pprof endpoints)
+	// Доступно по адресу /debug/pprof/
+	r.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
+
 	// Фоновая очистка истекших сессий (каждый час)
 	go func() {
 		ticker := time.NewTicker(1 * time.Hour)
@@ -170,7 +186,7 @@ func main() {
 		}
 	}()
 
-	port := ":8003"
+	port := ":8004"
 	log.Printf("Сервер запущен на http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, r))
 }

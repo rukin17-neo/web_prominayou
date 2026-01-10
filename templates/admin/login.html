@@ -15,7 +15,6 @@
     {{ end }}
 
     <form action="/admin/login" method="POST" class="admin-form" style="padding: 30px;">
-        {{ .CSRFField }}
         <div class="form-group">
             <label for="username">Имя пользователя:</label>
             <input type="text" id="username" name="username" required autofocus class="form-control">

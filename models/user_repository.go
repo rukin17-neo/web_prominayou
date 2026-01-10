@@ -39,11 +39,44 @@ func (r *UserRepository) InitSchema() error {
 	return err
 }
 
+// GetAll возвращает всех пользователей без пагинации (для обратной совместимости)
 func (r *UserRepository) GetAll() ([]User, error) {
 	var users []User
 	query := `SELECT id, username, email, password_hash, created_at, updated_at FROM users ORDER BY id`
 	err := r.db.Select(&users, query)
 	return users, err
+}
+
+// GetAllWithPagination возвращает пользователей с пагинацией
+func (r *UserRepository) GetAllWithPagination(params PaginationParams) ([]User, PaginationResult, error) {
+	var users []User
+
+	// Получение общего количества пользователей
+	total, err := r.Count()
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	// Запрос с пагинацией
+	query := `SELECT id, username, email, password_hash, created_at, updated_at
+	          FROM users
+	          ORDER BY id
+	          LIMIT $1 OFFSET $2`
+	err = r.db.Select(&users, query, params.Limit, params.GetOffset())
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	pagination := NewPaginationResult(total, params)
+	return users, pagination, nil
+}
+
+// Count возвращает общее количество пользователей
+func (r *UserRepository) Count() (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM users`
+	err := r.db.Get(&count, query)
+	return count, err
 }
 
 func (r *UserRepository) GetByID(id int) (*User, error) {

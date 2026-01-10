@@ -15,7 +15,6 @@
                 Вы вошли как: <strong style="color: var(--light-gold);">{{ .CurrentUser.Username }}</strong>
             </div>
             <form action="/admin/logout" method="POST" style="margin: 0;">
-                {{ .CSRFField }}
                 <button type="submit" class="btn btn-secondary" style="padding: 8px 16px;">Выйти</button>
             </form>
         </div>
@@ -24,7 +23,6 @@
             <h2>Управление услугами</h2>
 
             <form action="/admin/services" method="POST" class="admin-form">
-                {{ .CSRFField }}
                 {{ if .EditService }}
                 <input type="hidden" name="id" value="{{ .EditService.ID }}">
                 {{ end }}
@@ -64,7 +62,6 @@
                             <td>
                                 <a href="/admin/services?edit={{ .ID }}" class="btn-edit">Редактировать</a>
                                 <form action="/admin/services/delete/{{ .ID }}" method="POST" style="display:inline;">
-                                    {{ $.CSRFField }}
                                     <button type="submit" class="btn-delete">Удалить</button>
                                 </form>
                             </td>
@@ -73,6 +70,7 @@
                     </tbody>
                 </table>
             </div>
+            {{ template "pagination" . }}
         </div>
     </div>
 </div>

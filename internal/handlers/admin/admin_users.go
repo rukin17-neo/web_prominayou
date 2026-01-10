@@ -20,7 +20,11 @@ func NewAdminUsersHandler(userRepo *models.UserRepository) *AdminUsersHandler {
 
 // List отображает список пользователей с возможностью редактирования
 func (h *AdminUsersHandler) List(w http.ResponseWriter, r *http.Request) {
-	users, err := h.userRepo.GetAll()
+	// Получение параметров пагинации из запроса
+	paginationParams := models.NewPaginationParams(r)
+
+	// Получение пользователей с пагинацией
+	users, pagination, err := h.userRepo.GetAllWithPagination(paginationParams)
 	if err != nil {
 		logAndRespondWithError(w, "GetAllUsers", err, ErrMsgLoadFailed, http.StatusInternalServerError)
 		return
@@ -49,6 +53,7 @@ func (h *AdminUsersHandler) List(w http.ResponseWriter, r *http.Request) {
 		EditUser      *models.User
 		CurrentUserID int
 		CurrentUser   *models.User
+		Pagination    models.PaginationResult
 	}
 
 	shared.RenderTemplate(w, r, "admin/users.html", pageData{
@@ -57,6 +62,7 @@ func (h *AdminUsersHandler) List(w http.ResponseWriter, r *http.Request) {
 		EditUser:      editUser,
 		CurrentUserID: currentUserID,
 		CurrentUser:   currentUser,
+		Pagination:    pagination,
 	})
 }
 

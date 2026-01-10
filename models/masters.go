@@ -1,19 +1,20 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type Master struct {
-	ID        int       `db:"id" json:"id"`
-	FirstName string    `db:"first_name" json:"first_name"`
-	LastName  string    `db:"last_name" json:"last_name"`
-	PhotoURL  string    `db:"photo_url" json:"photo_url"`
-	PhotoData []byte    `db:"photo_data" json:"-"`          // бинарные данные фотографии
-	PhotoType string    `db:"photo_type" json:"photo_type"` // MIME тип фотографии
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	ID        int            `db:"id" json:"id"`
+	FirstName string         `db:"first_name" json:"first_name"`
+	LastName  string         `db:"last_name" json:"last_name"`
+	PhotoURL  sql.NullString `db:"photo_url" json:"photo_url"`
+	PhotoData []byte         `db:"photo_data" json:"-"`          // бинарные данные фотографии
+	PhotoType sql.NullString `db:"photo_type" json:"photo_type"` // MIME тип фотографии
+	CreatedAt time.Time      `db:"created_at" json:"created_at"`
 }
 
 type MastersRepository struct {
@@ -39,6 +40,7 @@ func (r *MastersRepository) InitSchema() error {
 	return err
 }
 
+// GetAll возвращает всех мастеров без пагинации (для обратной совместимости)
 func (r *MastersRepository) GetAll() ([]Master, error) {
 	var masters []Master
 	query := `SELECT id, first_name, last_name, photo_url, photo_data, photo_type, created_at FROM masters ORDER BY id`
@@ -46,6 +48,37 @@ func (r *MastersRepository) GetAll() ([]Master, error) {
 		return nil, err
 	}
 	return masters, nil
+}
+
+// GetAllWithPagination возвращает мастеров с пагинацией
+func (r *MastersRepository) GetAllWithPagination(params PaginationParams) ([]Master, PaginationResult, error) {
+	var masters []Master
+
+	// Получение общего количества мастеров
+	total, err := r.Count()
+	if err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	// Запрос с пагинацией
+	query := `SELECT id, first_name, last_name, photo_url, photo_data, photo_type, created_at
+	          FROM masters
+	          ORDER BY id
+	          LIMIT $1 OFFSET $2`
+	if err := r.db.Select(&masters, query, params.Limit, params.GetOffset()); err != nil {
+		return nil, PaginationResult{}, err
+	}
+
+	pagination := NewPaginationResult(total, params)
+	return masters, pagination, nil
+}
+
+// Count возвращает общее количество мастеров
+func (r *MastersRepository) Count() (int, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM masters`
+	err := r.db.Get(&count, query)
+	return count, err
 }
 
 func (r *MastersRepository) GetByID(id int) (*Master, error) {
@@ -59,12 +92,26 @@ func (r *MastersRepository) GetByID(id int) (*Master, error) {
 
 func (r *MastersRepository) Create(m *Master) error {
 	query := `INSERT INTO masters (first_name, last_name, photo_url, photo_data, photo_type) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`
-	return r.db.QueryRow(query, m.FirstName, m.LastName, m.PhotoURL, m.PhotoData, m.PhotoType).Scan(&m.ID, &m.CreatedAt)
+	var photoURL, photoType interface{}
+	if m.PhotoURL.Valid {
+		photoURL = m.PhotoURL.String
+	}
+	if m.PhotoType.Valid {
+		photoType = m.PhotoType.String
+	}
+	return r.db.QueryRow(query, m.FirstName, m.LastName, photoURL, m.PhotoData, photoType).Scan(&m.ID, &m.CreatedAt)
 }
 
 func (r *MastersRepository) Update(m *Master) error {
 	query := `UPDATE masters SET first_name = $1, last_name = $2, photo_url = $3, photo_data = $4, photo_type = $5 WHERE id = $6`
-	_, err := r.db.Exec(query, m.FirstName, m.LastName, m.PhotoURL, m.PhotoData, m.PhotoType, m.ID)
+	var photoURL, photoType interface{}
+	if m.PhotoURL.Valid {
+		photoURL = m.PhotoURL.String
+	}
+	if m.PhotoType.Valid {
+		photoType = m.PhotoType.String
+	}
+	_, err := r.db.Exec(query, m.FirstName, m.LastName, photoURL, m.PhotoData, photoType, m.ID)
 	return err
 }
 

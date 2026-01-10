@@ -17,8 +17,38 @@ func InitTemplates() error {
 	templateCacheOnce.Do(func() {
 		templateCache = make(map[string]*template.Template)
 
+		// Функции для шаблонов
+		funcMap := template.FuncMap{
+			"add": func(a, b int) int { return a + b },
+			"sub": func(a, b int) int { return a - b },
+			"seq": func(start, end int) []int {
+				if start > end {
+					return []int{}
+				}
+				seq := make([]int, end-start+1)
+				for i := range seq {
+					seq[i] = start + i
+				}
+				return seq
+			},
+		}
+
 		basePath := filepath.Join("templates", "base.html")
-		baseTmpl := template.Must(template.ParseFiles(basePath))
+		paginationPath := filepath.Join("templates", "partials", "pagination.html")
+
+		// Парсим базовый шаблон с функциями
+		baseTmpl, err := template.New("base.html").Funcs(funcMap).ParseFiles(basePath)
+		if err != nil {
+			initErr = err
+			return
+		}
+
+		// Добавляем partial шаблон пагинации в базовый шаблон
+		baseTmpl, err = baseTmpl.ParseFiles(paginationPath)
+		if err != nil {
+			initErr = err
+			return
+		}
 
 		templates := []string{
 			"index.html",

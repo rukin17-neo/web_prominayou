@@ -54,3 +54,6 @@ database_*.sql
 # Security reports
 report.md
 report_2.md
+report_3.md
+SECURITY_AUDIT.md
+TEST_RESULTS.md
