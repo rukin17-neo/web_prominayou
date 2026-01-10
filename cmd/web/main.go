@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	_ "net/http/pprof"
 )
 
 func cacheControl(h http.Handler) http.Handler {
@@ -38,6 +39,11 @@ func main() {
 		log.Fatalf("Не удалось проверить подключение к БД: %v", err)
 	}
 	log.Println("Успешное подключение к PostgreSQL")
+
+	// Применение оптимизаций БД (индексы, ANALYZE)
+	if err := config.OptimizeDatabase(db.DB); err != nil {
+		log.Printf("Предупреждение: не удалось применить оптимизации БД: %v", err)
+	}
 
 	if err := handlers.InitTemplates(); err != nil {
 		log.Fatalf("Ошибка загрузки шаблонов: %v", err)
@@ -156,6 +162,10 @@ func main() {
 	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static", cacheControl(http.FileServer(http.Dir("static")))),
 	)
+
+	// Профилирование (pprof endpoints)
+	// Доступно по адресу /debug/pprof/
+	r.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 
 	// Фоновая очистка истекших сессий (каждый час)
 	go func() {
