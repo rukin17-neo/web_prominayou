@@ -222,49 +222,343 @@ a:hover {
   font-weight: 600;
 }
 
-/* Адаптация для мобильных (в стиле prominayou.ru) */
+/* =====================================================
+   МОБИЛЬНОЕ МЕНЮ (ГАМБУРГЕР)
+   ===================================================== */
+
+/* Кнопка гамбургер - скрыта на десктопе */
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 1.5rem;
+  z-index: 1001;
+}
+
+.hamburger-line {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+/* Анимация превращения в X */
+.menu-open .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-open .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* =====================================================
+   АДАПТИВНЫЕ СТИЛИ - ПЛАНШЕТЫ (до 1024px)
+   ===================================================== */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 1.5rem;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .masters-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-content h1 {
+    font-size: 3rem;
+  }
+
+  .services-section {
+    margin: 1rem;
+  }
+}
+
+/* =====================================================
+   АДАПТИВНЫЕ СТИЛИ - МОБИЛЬНЫЕ (до 768px)
+   ===================================================== */
 @media (max-width: 768px) {
+  /* Показываем кнопку гамбургер */
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  /* Шапка */
+  header {
+    padding: 0.75rem 0;
+  }
+
+  .header-logo {
+    margin-left: 1rem;
+  }
+
+  .header-logo img {
+    height: 50px;
+  }
+
+  /* Мобильное меню */
+  .nav-container {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background: var(--white);
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease;
+    margin-right: 0;
+    z-index: 1000;
+    padding-top: 80px;
+  }
+
+  .nav-container.nav-open {
+    right: 0;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .nav-links a {
+    padding: 1rem;
+    margin: 0;
+    border-bottom: 1px solid var(--light-gray);
+    border-radius: 0;
+    font-size: 1.1rem;
+  }
+
+  .nav-links a:hover {
+    background-color: var(--gold-light);
+    color: var(--primary);
+  }
+
+  /* Основной контент */
+  main {
+    padding-top: 80px;
+  }
+
   body {
     font-size: 1rem;
     line-height: 1.6;
   }
-  
+
   h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
-  
+
   h2 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
-  
+
   .content-section {
     padding: 1rem;
   }
-  
+
+  /* Hero секция */
+  .hero-section {
+    height: 70vh;
+  }
+
+  .hero-content {
+    padding: 1rem;
+  }
+
   .hero-content h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
-  
+
   .hero-content p {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
-  
+
+  .hero-logo {
+    height: 80px;
+  }
+
+  .logo-subtitle {
+    font-size: 1.2rem;
+  }
+
   .hero-buttons {
     flex-direction: column;
     align-items: center;
+    gap: 0.75rem;
   }
-  
+
+  .hero-buttons .btn {
+    width: 100%;
+    max-width: 250px;
+    text-align: center;
+  }
+
+  /* Сетки */
   .features-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  
+
   .masters-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
-  
+
   .reviews-container {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
+
+  /* Карточки */
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  .master-card {
+    max-width: 100%;
+  }
+
+  .master-photo {
+    height: 250px;
+  }
+
+  /* Контент блоки */
+  .content-block {
+    margin: 1rem;
+    padding: 1.5rem;
+    border-radius: 10px;
+  }
+
+  .services-section {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  /* Таблица услуг */
+  .services-table {
+    font-size: 0.9rem;
+  }
+
+  .services-table th,
+  .services-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Footer */
+  footer {
+    padding: 2rem 1rem;
+  }
+}
+
+/* =====================================================
+   АДАПТИВНЫЕ СТИЛИ - МАЛЕНЬКИЕ МОБИЛЬНЫЕ (до 480px)
+   ===================================================== */
+@media (max-width: 480px) {
+  .header-logo img {
+    height: 40px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+
+  .hero-section {
+    height: 60vh;
+  }
+
+  .hero-content h1 {
+    font-size: 1.6rem;
+  }
+
+  .hero-logo {
+    height: 60px;
+  }
+
+  .logo-subtitle {
+    font-size: 1rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .content-block {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  .services-section {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  /* Горизонтальный скролл для таблиц на маленьких экранах */
+  .services-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .services-table {
+    min-width: 500px;
+  }
+
+  .master-photo {
+    height: 200px;
+  }
+
+  .review-card {
+    padding: 1.5rem;
+  }
+
+  .review-author {
+    font-size: 1.1rem;
+  }
+
+  .review-text {
+    font-size: 1rem;
+  }
+}
+
+/* =====================================================
+   ЗАТЕМНЕНИЕ ПРИ ОТКРЫТОМ МЕНЮ
+   ===================================================== */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.nav-overlay.active {
+  display: block;
 }
 
 /* Стили для админ панели услуг */
@@ -933,5 +1227,167 @@ table th {
   background: var(--secondary);
   color: var(--primary);
   border-color: var(--secondary);
+}
+
+/* =====================================================
+   АДМИН-ПАНЕЛЬ LAYOUT
+   ===================================================== */
+.admin-layout {
+  display: flex;
+  min-height: calc(100vh - 120px);
+}
+
+.admin-sidebar {
+  width: 220px;
+  background: #1a1a1a;
+  padding: 2rem 0;
+  border-right: 1px solid #333;
+  flex-shrink: 0;
+}
+
+.admin-sidebar nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar nav a {
+  padding: 1rem 1.5rem;
+  color: #f0f0f0;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.admin-sidebar nav a:hover {
+  background: #2a2a2a;
+  border-left-color: var(--secondary);
+  color: var(--secondary);
+}
+
+.admin-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+/* Адаптивность для админки - планшеты */
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    width: 180px;
+  }
+
+  .admin-sidebar nav a {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Адаптивность для админки - мобильные */
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #333;
+    padding: 1rem 0;
+  }
+
+  .admin-sidebar nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .admin-sidebar nav a {
+    padding: 0.5rem 1rem;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    font-size: 0.85rem;
+    border-radius: 5px;
+    background: #2a2a2a;
+  }
+
+  .admin-sidebar nav a:hover {
+    border-bottom-color: var(--secondary);
+    border-left: none;
+  }
+
+  .admin-content {
+    padding: 0.5rem;
+  }
+
+  .admin-container {
+    margin: 10px auto;
+    padding: 15px;
+  }
+
+  .admin-form {
+    padding: 15px;
+  }
+
+  .form-group input {
+    padding: 8px;
+  }
+
+  /* Адаптивные таблицы в админке */
+  .admin-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-container table {
+    min-width: 600px;
+  }
+
+  .admin-container table th,
+  .admin-container table td {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  .btn-edit, .btn-delete {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+
+  .admin-header {
+    flex-direction: column !important;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+/* Адаптивность для админки - маленькие экраны */
+@media (max-width: 480px) {
+  .admin-sidebar nav a {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .admin-container {
+    padding: 10px;
+    margin: 5px;
+  }
+
+  .admin-container table {
+    font-size: 0.8rem;
+  }
+
+  .dashboard-card {
+    padding: 1.5rem;
+  }
+
+  .dashboard-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .admin-dashboard {
+    grid-template-columns: 1fr;
+  }
 }
 
