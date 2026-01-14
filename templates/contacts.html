@@ -1,14 +1,84 @@
 {{ define "content" }}
-<div class="contacts">
-    <h1>{{ .Title }}</h1>
-    <p>{{ .Content }}</p>
-    
-    <div class="contact-info">
-        <h3>Адрес:</h3>
-        <p>{{ .Address }}</p>
-        
-        <h3>Телефонsss:</h3>
-        <p>{{ .Phone }}</p>
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge animate-on-scroll">Связь</span>
+            <h2 class="section-title animate-on-scroll">Контакты</h2>
+            <p class="section-subtitle animate-on-scroll">
+                Мы всегда рады ответить на ваши вопросы
+            </p>
+        </div>
+
+        <div class="contacts-grid">
+            <div class="card contact-item animate-on-scroll">
+                <div class="contact-icon">📍</div>
+                <div>
+                    <p class="contact-label">Адрес</p>
+                    <p class="contact-value">{{ if .Address }}{{ .Address }}{{ else }}г. Москва, ул. Примерная, д. 1{{ end }}</p>
+                </div>
+            </div>
+
+            <div class="card contact-item animate-on-scroll animate-delay-1">
+                <div class="contact-icon">📞</div>
+                <div>
+                    <p class="contact-label">Телефон</p>
+                    <p class="contact-value">{{ if .Phone }}{{ .Phone }}{{ else }}+7 (999) 123-45-67{{ end }}</p>
+                </div>
+            </div>
+
+            <div class="card contact-item animate-on-scroll animate-delay-2">
+                <div class="contact-icon">✉️</div>
+                <div>
+                    <p class="contact-label">Email</p>
+                    <p class="contact-value">info@prominayou.ru</p>
+                </div>
+            </div>
+
+            <div class="card contact-item animate-on-scroll animate-delay-3">
+                <div class="contact-icon">🕐</div>
+                <div>
+                    <p class="contact-label">Режим работы</p>
+                    <p class="contact-value">Ежедневно 10:00 - 22:00</p>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+</section>
+
+<!-- Social Links Section (место для будущих интеграций) -->
+<section class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge animate-on-scroll">Мы в сети</span>
+            <h2 class="section-title animate-on-scroll">Свяжитесь с нами</h2>
+            <p class="section-subtitle animate-on-scroll">
+                Выберите удобный способ связи
+            </p>
+        </div>
+
+        <!-- Здесь будут кнопки интеграций: YClients, WhatsApp, Telegram, Яндекс Карты -->
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: 900px; margin: 0 auto;">
+            <div class="card feature-card animate-on-scroll" style="padding: 2rem;">
+                <div class="feature-icon">📅</div>
+                <h3 class="feature-title" style="font-size: 1rem;">Онлайн-запись</h3>
+                <p class="feature-text" style="font-size: 0.85rem;">Скоро</p>
+            </div>
+            <div class="card feature-card animate-on-scroll animate-delay-1" style="padding: 2rem;">
+                <div class="feature-icon">💬</div>
+                <h3 class="feature-title" style="font-size: 1rem;">WhatsApp</h3>
+                <p class="feature-text" style="font-size: 0.85rem;">Скоро</p>
+            </div>
+            <div class="card feature-card animate-on-scroll animate-delay-2" style="padding: 2rem;">
+                <div class="feature-icon">✈️</div>
+                <h3 class="feature-title" style="font-size: 1rem;">Telegram</h3>
+                <p class="feature-text" style="font-size: 0.85rem;">Скоро</p>
+            </div>
+            <div class="card feature-card animate-on-scroll animate-delay-3" style="padding: 2rem;">
+                <div class="feature-icon">🗺️</div>
+                <h3 class="feature-title" style="font-size: 1rem;">На карте</h3>
+                <p class="feature-text" style="font-size: 0.85rem;">Скоро</p>
+            </div>
+        </div>
+    </div>
+</section>
 {{ end }}

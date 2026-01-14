@@ -95,7 +95,6 @@ func main() {
 	r.HandleFunc("/", clientHandlers.HomeHandler).Methods("GET")
 	r.HandleFunc("/services", servicesHandler.GetAllServices).Methods("GET")
 	r.HandleFunc("/contacts", clientHandlers.ContactsHandler).Methods("GET")
-	r.HandleFunc("/reviews", clientHandlers.ReviewsHandler).Methods("GET")
 	r.HandleFunc("/masters", mastersHandler.List).Methods("GET")
 
 	r.HandleFunc("/masters/photo/{id}", mastersHandler.GetPhoto).Methods("GET")

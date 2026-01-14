@@ -1,73 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>{{.Title}}</title>
+    <title>{{.Title}} | ProminaYou</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="theme-color" content="#D4AF37">
+    <meta name="description" content="ProminaYou - Массажный салон премиум класса. Профессиональный массаж в уютной атмосфере.">
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <header>
-        <div class="header-logo">
-            <img src="/static/images/logo/f.png" alt="ProminaYou Logo" onerror="console.log('Ошибка загрузки логотипа:', this.src)">
+    <!-- Навигация -->
+    <header class="header">
+        <div class="header-container">
+            <a href="/" class="logo">
+                <img src="/static/images/logo/f.png" alt="ProminaYou" class="logo-img">
+            </a>
+
+            <!-- Мобильное меню -->
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Меню">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+
+            <nav class="nav" id="nav-menu">
+                <a href="/" class="nav-link">Главная</a>
+                <a href="/services" class="nav-link">Услуги</a>
+                <a href="/masters" class="nav-link">Мастера</a>
+                <a href="/contacts" class="nav-link">Контакты</a>
+                <a href="/admin" class="nav-link nav-link-admin">Админ</a>
+            </nav>
         </div>
-
-        <!-- Кнопка мобильного меню (гамбургер) -->
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Открыть меню">
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-            <span class="hamburger-line"></span>
-        </button>
-
-        <nav class="nav-container" id="nav-menu">
-            <div class="nav-links">
-                <a href="/">Главная</a>
-                <a href="/contacts">Контакты</a>
-                <a href="/reviews">Отзывы</a>
-                <a href="/services">Услуги</a>
-                <a href="/masters">Наши мастера</a>
-                <a href="/admin">Администратор</a>
-            </div>
-        </nav>
     </header>
 
+    <!-- Основной контент -->
+    <main class="main">
+        {{ block "content" . }}{{ end }}
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <img src="/static/images/logo/f.png" alt="ProminaYou" class="footer-logo">
+                <p class="footer-tagline">Искусство расслабления</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="/services">Услуги</a>
+                <a href="/masters">Мастера</a>
+                <a href="/contacts">Контакты</a>
+            </div>
+
+            <div class="footer-copyright">
+                <p>&copy; 2025 ProminaYou. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Скрипты -->
     <script>
+        // Мобильное меню
         function toggleMobileMenu() {
             const nav = document.getElementById('nav-menu');
             const btn = document.querySelector('.mobile-menu-btn');
             nav.classList.toggle('nav-open');
             btn.classList.toggle('menu-open');
+            document.body.classList.toggle('menu-active');
         }
 
         // Закрытие меню при клике на ссылку
-        document.querySelectorAll('.nav-links a').forEach(link => {
+        document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 document.getElementById('nav-menu').classList.remove('nav-open');
                 document.querySelector('.mobile-menu-btn').classList.remove('menu-open');
+                document.body.classList.remove('menu-active');
             });
         });
+
+        // Анимация появления элементов при скролле
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Включаем анимации только если JS работает
+            document.body.classList.add('js-enabled');
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        // Скрытие хедера при скролле вниз
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll > lastScroll && currentScroll > 100) {
+                header.classList.add('header-hidden');
+            } else {
+                header.classList.remove('header-hidden');
+            }
+            lastScroll = currentScroll;
+        });
     </script>
-    
-    <div class="section_image_container">
-        <div id="section_image_de41a73e7b154889991924be7ce4648b" 
-             class="section-image" 
-             style="background-image: url('//m-files.cdn1.cc/lpfile/0/3/0/030d6930f204839988fb60f88981d1e5.jpeg'); 
-                    background-position: 50% 50%; 
-                    background-repeat: no-repeat; 
-                    filter: none;">
-        </div>
-    </div>
-    
-    <main>
-        <div class="content-block">
-            {{ block "content" . }} {{ end }} 
-        </div>
-    </main>
-    
-    <footer>
-        <p>© 2025 ProminaYou</p>
-    </footer>
 </body>
 </html>

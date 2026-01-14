@@ -54,7 +54,6 @@ func InitTemplates() error {
 			"index.html",
 			"services.html",
 			"contacts.html",
-			"reviews.html",
 			"masters.html",
 			"admin/admin.html",
 			"admin/masters.html",
