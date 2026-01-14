@@ -1,16 +1,63 @@
 {{ define "content" }}
-<section class="content">
-    <h2>{{ .Title }}</h2>
-    <p>{{ .Content }}</p>
-    <div class="masters-grid">
-        {{ range .Masters }}
-        <div class="master-card">
-            <img src="{{ .PhotoURL.String }}" alt="{{ .FirstName }} {{ .LastName }}" class="master-photo">
-            <div class="master-name">{{ .FirstName }} {{ .LastName }}</div>
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge animate-on-scroll">Команда</span>
+            <h2 class="section-title animate-on-scroll">Наши мастера</h2>
+            <p class="section-subtitle animate-on-scroll">
+                Профессионалы своего дела с многолетним опытом работы
+            </p>
         </div>
-        {{ end }}
+
+        <div class="masters-grid">
+            {{ range .Masters }}
+            <article class="card master-card animate-on-scroll">
+                <div class="master-photo-wrapper">
+                    {{ if .PhotoURL.Valid }}
+                    <img src="{{ .PhotoURL.String }}" alt="{{ .FirstName }} {{ .LastName }}" class="master-photo">
+                    {{ else }}
+                    <div class="master-photo" style="background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%); display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 4rem; color: var(--gold);">{{ slice .FirstName 0 1 }}</span>
+                    </div>
+                    {{ end }}
+                    <div class="master-overlay"></div>
+                </div>
+                <div class="master-info">
+                    <h3 class="master-name">{{ .FirstName }} {{ .LastName }}</h3>
+                    <p class="master-specialty">Мастер массажа</p>
+                </div>
+            </article>
+            {{ else }}
+            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <p style="color: var(--text-muted);">Информация о мастерах скоро появится</p>
+            </div>
+            {{ end }}
+        </div>
+
+        {{ template "pagination" . }}
     </div>
-    {{ template "pagination" . }}
+</section>
+
+<!-- About Team -->
+<section class="section section-dark">
+    <div class="container">
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <div class="card feature-card animate-on-scroll">
+                <div class="feature-icon">🎓</div>
+                <h3 class="feature-title">Сертификаты</h3>
+                <p class="feature-text">Все мастера имеют профессиональные сертификаты</p>
+            </div>
+            <div class="card feature-card animate-on-scroll animate-delay-1">
+                <div class="feature-icon">⏱️</div>
+                <h3 class="feature-title">Опыт 5+ лет</h3>
+                <p class="feature-text">Средний стаж работы наших специалистов</p>
+            </div>
+            <div class="card feature-card animate-on-scroll animate-delay-2">
+                <div class="feature-icon">💝</div>
+                <h3 class="feature-title">Индивидуальный подход</h3>
+                <p class="feature-text">Учитываем особенности каждого клиента</p>
+            </div>
+        </div>
+    </div>
 </section>
 {{ end }}
-

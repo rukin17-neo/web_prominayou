@@ -1,32 +1,49 @@
 {{ define "content" }}
-<section class="services-section">
-    <h2>{{ .Title }}</h2>
-    <table class="services-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Название</th>
-                <th>Цена</th>
-                <th>Длительность</th>
-            </tr>
-        </thead>
-        <tbody>
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge animate-on-scroll">Каталог</span>
+            <h2 class="section-title animate-on-scroll">Наши услуги</h2>
+            <p class="section-subtitle animate-on-scroll">
+                Широкий выбор массажных техник для вашего здоровья и красоты
+            </p>
+        </div>
+
+        <div class="services-grid">
             {{ range .Services }}
-            <tr>
-                <td>{{ .ID }}</td>
-                <td>{{ .Name }}</td>
-                <td>{{ printf "%.2f" .Price }} ₽</td>
-                <td>{{ .Duration }}</td>
-            </tr>
+            <article class="card service-card animate-on-scroll">
+                <div class="service-content">
+                    <h3 class="service-name">{{ .Name }}</h3>
+                    <p class="service-description">
+                        Профессиональный массаж для восстановления сил и улучшения самочувствия
+                    </p>
+                </div>
+                <div class="service-footer">
+                    <span class="service-price">{{ printf "%.0f" .Price }} ₽</span>
+                    <span class="service-duration">{{ .Duration }}</span>
+                </div>
+            </article>
+            {{ else }}
+            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <p style="color: var(--text-muted);">Услуги пока не добавлены</p>
+            </div>
             {{ end }}
-        </tbody>
-    </table>
-    {{ template "pagination" . }}
+        </div>
+
+        {{ template "pagination" . }}
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="section section-dark">
+    <div class="container">
+        <div class="card" style="text-align: center; padding: 3rem 2rem;">
+            <h3 class="animate-on-scroll" style="margin-bottom: 1rem;">Не нашли нужную услугу?</h3>
+            <p class="animate-on-scroll" style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Свяжитесь с нами, и мы подберём программу специально для вас
+            </p>
+            <a href="/contacts" class="btn btn-primary animate-on-scroll">Связаться</a>
+        </div>
+    </div>
 </section>
 {{ end }}
-
-
-
-
-
-

@@ -1,47 +1,79 @@
 {{ define "content" }}
-<section class="hero-section">
-    <!-- фоновое изображение -->
-    <div class="section_image_container">
-        <div id="section_image_de41a73e7b154889991924be7ce4648b" 
-             class="section-image" 
-             style="background-image: url('//m-files.cdn1.cc/lpfile/0/3/0/030d6930f204839988fb60f88981d1e5.jpeg'); 
-                    background-position: 50% 50%; 
-                    background-repeat: no-repeat; 
-                    filter: none;">
-        </div>
-    </div>
-    
-    <!-- контент поверх изображения -->
+<!-- Hero Section -->
+<section class="hero">
+    <!-- Декоративные элементы -->
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+
     <div class="hero-content">
-        <!-- логотип ProminaYou -->
-        <div class="logo-container">
-            <img src="/static/images/logo/f(1).png" alt="ProminaYou Logo" class="hero-logo">
-            <div class="logo-subtitle">Массажный салон</div>
-        </div>
-        
-        <p>Профессиональный массаж в уютной атмосфере</p>
-        <div class="hero-buttons">
+        <span class="hero-badge animate-on-scroll">Премиум массаж</span>
+
+        <h1 class="hero-title animate-on-scroll animate-delay-1">ProminaYou</h1>
+
+        <p class="hero-subtitle animate-on-scroll animate-delay-2">
+            Искусство расслабления в руках профессионалов.
+            Погрузитесь в мир гармонии и восстановите силы.
+        </p>
+
+        <div class="hero-buttons animate-on-scroll animate-delay-3">
             <a href="/services" class="btn btn-primary">Наши услуги</a>
-            <a href="/masters" class="btn btn-secondary">Наши мастера</a>
+            <a href="/masters" class="btn btn-secondary">Познакомиться с мастерами</a>
         </div>
     </div>
 </section>
 
-<section class="features-section">
+<!-- Features Section -->
+<section class="section section-dark">
     <div class="container">
-        <h2>Почему выбирают нас</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <h3>Профессионализм</h3>
-                <p>Опытные мастера с многолетним стажем</p>
+        <div class="section-header">
+            <span class="section-badge animate-on-scroll">Почему мы</span>
+            <h2 class="section-title animate-on-scroll">Наши преимущества</h2>
+            <p class="section-subtitle animate-on-scroll">
+                Мы создаём атмосферу абсолютного комфорта и заботы о вашем теле
+            </p>
+        </div>
+
+        <div class="cards-grid">
+            <div class="card feature-card animate-on-scroll">
+                <div class="feature-icon">✨</div>
+                <h3 class="feature-title">Профессионализм</h3>
+                <p class="feature-text">
+                    Сертифицированные мастера с многолетним опытом и индивидуальным подходом к каждому клиенту
+                </p>
             </div>
-            <div class="feature-card">
-                <h3>Уютная атмосфера</h3>
-                <p>Комфортные условия для полного расслабления</p>
+
+            <div class="card feature-card animate-on-scroll animate-delay-1">
+                <div class="feature-icon">🌿</div>
+                <h3 class="feature-title">Премиум качество</h3>
+                <p class="feature-text">
+                    Используем только натуральные масла и косметику премиум-класса для максимального эффекта
+                </p>
             </div>
-            <div class="feature-card">
-                <h3>Высокое качество</h3>
-                <p>Используем только лучшие материалы и техники</p>
+
+            <div class="card feature-card animate-on-scroll animate-delay-2">
+                <div class="feature-icon">🏛️</div>
+                <h3 class="feature-title">Уютная атмосфера</h3>
+                <p class="feature-text">
+                    Стильный интерьер, приватные кабинеты и расслабляющая музыка для полного погружения
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section">
+    <div class="container">
+        <div class="card" style="text-align: center; padding: 4rem 2rem;">
+            <span class="section-badge animate-on-scroll">Специальное предложение</span>
+            <h2 class="section-title animate-on-scroll" style="margin-top: 1rem;">
+                Первый визит со скидкой 20%
+            </h2>
+            <p class="section-subtitle animate-on-scroll" style="margin-bottom: 2rem;">
+                Запишитесь прямо сейчас и получите скидку на первое посещение
+            </p>
+            <div class="animate-on-scroll">
+                <a href="/contacts" class="btn btn-primary">Записаться</a>
             </div>
         </div>
     </div>
