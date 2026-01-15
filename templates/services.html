@@ -1,13 +1,18 @@
 {{ define "content" }}
+<!-- Hero секция с фоном -->
+<section class="page-hero">
+    <div class="page-hero-bg" style="background-image: url('/static/images/services-bg.jpg');"></div>
+    <div class="page-hero-content">
+        <span class="section-badge animate-on-scroll">Каталог</span>
+        <h1 class="page-hero-title animate-on-scroll">Наши услуги</h1>
+        <p class="page-hero-subtitle animate-on-scroll">
+            Широкий выбор массажных техник для вашего здоровья и красоты
+        </p>
+    </div>
+</section>
+
 <section class="section">
     <div class="container">
-        <div class="section-header">
-            <span class="section-badge animate-on-scroll">Каталог</span>
-            <h2 class="section-title animate-on-scroll">Наши услуги</h2>
-            <p class="section-subtitle animate-on-scroll">
-                Широкий выбор массажных техник для вашего здоровья и красоты
-            </p>
-        </div>
 
         <div class="services-grid">
             {{ range .Services }}
