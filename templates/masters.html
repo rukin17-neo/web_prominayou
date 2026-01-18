@@ -1,14 +1,18 @@
 {{ define "content" }}
+<!-- Hero секция с фоном -->
+<section class="page-hero">
+    <div class="page-hero-bg" style="background-image: url('/static/images/masters-bg.jpg');"></div>
+    <div class="page-hero-content">
+        <span class="section-badge animate-on-scroll">Команда</span>
+        <h1 class="page-hero-title animate-on-scroll">Наши мастера</h1>
+        <p class="page-hero-subtitle animate-on-scroll">
+            Профессионалы своего дела с многолетним опытом работы
+        </p>
+    </div>
+</section>
+
 <section class="section">
     <div class="container">
-        <div class="section-header">
-            <span class="section-badge animate-on-scroll">Команда</span>
-            <h2 class="section-title animate-on-scroll">Наши мастера</h2>
-            <p class="section-subtitle animate-on-scroll">
-                Профессионалы своего дела с многолетним опытом работы
-            </p>
-        </div>
-
         <div class="masters-grid">
             {{ range .Masters }}
             <article class="card master-card animate-on-scroll">

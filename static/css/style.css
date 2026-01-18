@@ -260,8 +260,19 @@ a:hover {
     background-image: url('/static/images/hero-bg.jpg');
     background-size: cover;
     background-position: center;
-    opacity: 0.3;
     z-index: -2;
+}
+
+.hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(10, 10, 10, 0.2) 0%,
+        rgba(10, 10, 10, 0.6) 100%
+    );
+    z-index: 1;
 }
 
 .hero-bg::after {
@@ -270,9 +281,11 @@ a:hover {
     inset: 0;
     background: linear-gradient(
         180deg,
-        rgba(10, 10, 10, 0.5) 0%,
-        rgba(10, 10, 10, 0.8) 100%
+        rgba(10, 10, 10, 0.4) 0%,
+        rgba(10, 10, 10, 0.15) 40%,
+        rgba(10, 10, 10, 0.5) 100%
     );
+    z-index: 2;
 }
 
 /* Декоративные элементы */
@@ -378,6 +391,75 @@ a:hover {
     border-color: var(--gold);
     color: var(--gold);
     transform: translateY(-3px);
+}
+
+/* =====================================================
+   PAGE HERO (для внутренних страниц)
+   ===================================================== */
+
+.page-hero {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: calc(var(--header-height) + 2rem) 2rem 4rem;
+}
+
+.page-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: -2;
+}
+
+.page-hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(10, 10, 10, 0.3) 0%,
+        rgba(10, 10, 10, 0.7) 100%
+    );
+    z-index: 1;
+}
+
+.page-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(10, 10, 10, 0.5) 0%,
+        rgba(10, 10, 10, 0.2) 50%,
+        rgba(10, 10, 10, 0.8) 100%
+    );
+    z-index: 2;
+}
+
+.page-hero-content {
+    text-align: center;
+    max-width: 800px;
+    z-index: 1;
+}
+
+.page-hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 1rem;
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-hero-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* =====================================================
@@ -1127,6 +1209,20 @@ table tr:hover td {
         justify-content: center;
     }
 
+    /* Page Hero (внутренние страницы) */
+    .page-hero {
+        min-height: 40vh;
+        padding: calc(var(--header-height) + 1.5rem) 1.5rem 3rem;
+    }
+
+    .page-hero-title {
+        font-size: clamp(1.75rem, 6vw, 2.5rem);
+    }
+
+    .page-hero-subtitle {
+        font-size: 1rem;
+    }
+
     /* Sections */
     .section {
         padding: 4rem 1.5rem;
@@ -1231,6 +1327,10 @@ table tr:hover td {
     .hero-glow {
         width: 300px;
         height: 300px;
+    }
+
+    .page-hero {
+        min-height: 35vh;
     }
 
     .feature-card {
